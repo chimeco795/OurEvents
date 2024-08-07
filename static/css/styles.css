@@ -1,0 +1,68 @@
+.checked {
+    color: orange;
+}
+
+.card-body img {
+    max-width: 100%;
+    height: auto;
+}
+
+
+
+
+
+/*Comentarios*/
+.star-rating {
+    direction: ltr;
+    display: inline-block;
+    font-size: 1.5rem;
+    position: relative;
+    width: 7.5rem;
+}
+
+.star-rating input {
+    display: none;
+}
+
+.star-rating label {
+    color: #ddd;
+    cursor: pointer;
+    font-size: 1.5rem;
+    position: absolute;
+    top: 0;
+    left: 0;
+    transition: color 0.2s ease-in-out;
+}
+
+.star-rating label:before {
+    content: '\2605';
+    /* Unicode star character */
+}
+
+.star-rating input:checked~label,
+.star-rating input:checked~label~label {
+    color: #ffc107;
+    /* Gold color */
+}
+
+.star-rating label:hover,
+.star-rating label:hover~label {
+    color: #ffeb3b;
+    /* Yellow color */
+}
+
+.star-rating input:checked:hover~label,
+.star-rating input:checked:hover~label~label {
+    color: #ffc107;
+    /* Gold color */
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.char-counter {
+    font-size: 0.9rem;
+    color: #666;
+    text-align: right;
+}

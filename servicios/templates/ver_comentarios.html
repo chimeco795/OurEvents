@@ -1,0 +1,19 @@
+{% for comentario in comentarios %}
+    <div class="media mb-4">
+        {% if comentario.imagen %}
+            <img src="{{ comentario.imagen.url }}" class="mr-3" alt="Imagen" style="width: 64px; height: 64px; object-fit: cover;">
+        {% endif %}
+        <div class="media-body">
+            <h5 class="mt-0">{{ comentario.nombre }}</h5>
+            <div class="star-rating">
+                {% for i in "12345" %}
+                    <input type="radio" id="display_star{{ comentario.id }}_{{ i }}" name="rating_display{{ comentario.id }}" value="{{ i }}" {% if i <= comentario.calificacion %} checked {% endif %} disabled><label for="display_star{{ comentario.id }}_{{ i }}"></label>
+                {% endfor %}
+            </div>
+            <p>{{ comentario.comentario }}</p>
+            <small class="text-muted">Revisado el {{ comentario.fecha|date:"d M Y" }}</small>
+        </div>
+    </div>
+{% empty %}
+    <p>No hay comentarios todavía.</p>
+{% endfor %}

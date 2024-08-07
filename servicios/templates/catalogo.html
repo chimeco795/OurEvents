@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Evento - Catálogo</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Catálogo de Productos - Mi Evento</h1>
+        <div class="row">
+            {% for producto in productos %}
+                <div class="col-md-4">
+                    <h2>{{ producto.nombre }}</h2>
+                    <p>{{ producto.descripcion }}</p>
+                    <p>Precio: ${{ producto.precio }}</p>
+                    <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}" class="img-fluid">
+                </div>
+            {% endfor %}
+        </div>
+        <a href="#" class="btn btn-primary">Pedir más información</a>
+    </div>
+</body>
+</html>
