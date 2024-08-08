@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block title %}Comentarios{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <!-- Columna izquierda: Estadísticas de opiniones -->
+        <div class="col-md-4">
+            <h2>Opiniones</h2>
+            <p>Promedio de estrellas: {{ promedio|floatformat:1 }}</p>
+            <ul class="list-group">
+                {% for estrella, porcentaje in porcentaje_estrellas.items %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        {{ estrella }} estrellas
+                        <span class="badge badge-primary badge-pill">{{ porcentaje|floatformat:0 }}%</span>
+                    </li>
+                {% endfor %}
+            </ul>
+            <button class="btn btn-primary mt-3" onclick="mostrarFormulario()">Escribir mi opinión</button>
+        </div>
+
+        <!-- Columna derecha: Lista de comentarios -->
+        <div class="col-md-8" id="lista-comentarios">
+            <h2>Opiniones recientes</h2>
+            <div id="comentarios-lista">
+                {% include 'comentarios/ver_comentarios.html' %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Formulario de comentarios en ventana completa -->
+    <div id="formulario-comentarios" style="display: none;">
+        <div class="card">
+            <div class="card-body">
+                {% include 'comentarios/capturar_comentarios.html' %}
+            </div>
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,29 @@
+.form-group {
+    margin-bottom: 1.5rem;
+    position: relative;
+}
+
+.icono {
+    color: #6c757d;
+    margin-right: 10px;
+}
+
+.progress {
+    height: 4px;
+    background-color: #e9ecef;
+    margin-top: 5px;
+}
+
+.progress-bar {
+    background-color: #007bff;
+}
+
+.form-check-label i {
+    margin-right: 5px;
+    transition: color 0.3s ease;
+}
+
+.form-check-input:checked+.form-check-label i {
+    color: #25d366;
+    /* Verde WhatsApp */
+}

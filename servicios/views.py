@@ -1,6 +1,11 @@
 from django.shortcuts import render, redirect
 from .models import Categoria, Producto, Comentario
 from django.db.models import Avg, Count
+from django.shortcuts import render
+from django.core.mail import send_mail
+from django.contrib import messages
+from django.conf import settings
+
 
 def home(request):
     categorias = Categoria.objects.all()
@@ -26,7 +31,7 @@ def ver_comentarios(request):
         'promedio': promedio,
         'porcentaje_estrellas': porcentaje_estrellas
     }
-    return render(request, 'comentarios.html', context)
+    return render(request, 'comentarios/comentarios.html', context)
 
 def capturar_comentarios(request):
     if request.method == 'POST':
@@ -37,3 +42,25 @@ def capturar_comentarios(request):
         Comentario.objects.create(nombre=nombre, comentario=comentario, imagen=imagen, calificacion=calificacion)
         return redirect('ver_comentarios')
     return render(request, 'capturar_comentarios.html')
+
+def contacto(request):
+    if request.method == 'POST':
+        nombre = request.POST['nombre']
+        email = request.POST['email']
+        asunto = request.POST['asunto']
+        mensaje = request.POST['mensaje']
+
+        # Enviar un correo electrónico
+        send_mail(
+            f"Mensaje de {nombre}: {asunto}",  # Asunto del correo
+            mensaje,  # Cuerpo del correo
+            email,  # Remitente
+            [settings.EMAIL_HOST_USER],  # Destinatario (configurado en settings.py)
+            fail_silently=False,
+        )
+
+        # Mostrar mensaje de éxito
+        messages.success(request, 'Gracias por contactarnos. Tu mensaje ha sido enviado.')
+        return render(request, 'contacto.html')
+
+    return render(request, 'contacto.html')

@@ -12,7 +12,7 @@ django.setup()
 from servicios.models import Categoria, Producto, Comentario
 
 # Inicializar Faker
-fake = Faker()
+fake = Faker('es_ES')
 
 def populate():
     # Define las categorías
@@ -51,7 +51,7 @@ def create_sample_comments():
         comentario = fake.text(max_nb_chars=200)
         imagen = None
         rating = random.randint(1, 5)
-        fecha = fake.date_this_year().isoformat()  # Asegúrate de que la fecha sea una cadena ISO
+        fecha = fake.date_between(start_date='-1y', end_date='today')  # Fecha aleatoria en el último año
 
         Comentario.objects.create(
             nombre=nombre,

@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="text-center mb-4">Contacto</h1>
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <form id="contacto-form" method="POST" action="">
+                <div class="form-group position-relative">
+                    <label for="nombre"><i class="fas fa-user icono"></i> Nombre</label>
+                    <input type="text" class="form-control" id="nombre" name="nombre" placeholder="Juan Pérez" maxlength="25" required>
+                    <div class="progress">
+                        <div class="progress-bar" id="nombre-progress" role="progressbar" style="width: 0%;"></div>
+                    </div>
+                </div>
+                <div class="form-group position-relative">
+                    <label for="correo"><i class="fas fa-envelope icono"></i> Correo</label>
+                    <input type="email" class="form-control" id="correo" name="correo" placeholder="contact@ourevents.com" required>
+                </div>
+                <div class="form-group position-relative">
+                    <label for="telefono"><i class="fas fa-phone icono"></i> Teléfono</label>
+                    <input type="text" class="form-control" id="telefono" name="telefono" placeholder="Ej: 5512345678" required>
+                </div>
+                <div class="form-group position-relative">
+                    <label for="asunto"><i class="fas fa-pencil-alt icono"></i> Asunto</label>
+                    <input type="text" class="form-control" id="asunto" name="asunto" placeholder="Quisiera una cotización de su decoración para cumpleaños #5" maxlength="35" required>
+                    <div class="progress">
+                        <div class="progress-bar" id="asunto-progress" role="progressbar" style="width: 0%;"></div>
+                    </div>
+                </div>
+                <div class="form-group position-relative">
+                    <label for="mensaje"><i class="fas fa-comment icono"></i> Mensaje</label>
+                    <textarea class="form-control" id="mensaje" name="mensaje" placeholder="Me gustaría conocer más sobre sus servicios para la fiesta de cumpleaños de mi hijo de 5 años. Estoy interesado en la decoración temática y en una mesa de dulces personalizada. Gracias." maxlength="300" rows="5" required></textarea>
+                    <div class="progress">
+                        <div class="progress-bar" id="mensaje-progress" role="progressbar" style="width: 0%;"></div>
+                    </div>
+                </div>
+                <div class="form-check mb-3">
+                    <input type="checkbox" class="form-check-input" id="whatsapp" name="whatsapp">
+                    <label class="form-check-label" for="whatsapp">
+                        <i class="fab fa-whatsapp icono"></i> WhatsApp
+                    </label>
+                </div>
+                <button type="submit" class="btn btn-primary mt-3">Enviar</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
