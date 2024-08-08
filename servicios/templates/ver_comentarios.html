@@ -6,7 +6,7 @@
         </div>
         <div class="stars">
             <div class="star-rating">
-                {% for i in "012345"|make_list %}
+                {% for i in "12345"|make_list %}
                     <input type="radio" id="display_star{{ comentario.id }}_{{ i }}" name="rating_display{{ comentario.id }}" value="{{ i }}" {% if i|add:0 <= comentario.calificacion %} checked {% endif %} disabled>
                     <label for="display_star{{ comentario.id }}_{{ i }}" title="{{ i }} estrellas"></label>
                 {% endfor %}

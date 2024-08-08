@@ -37,89 +37,9 @@
     /* Unicode star character */
 }
 
-.star-rating input:checked~label {
-    color: #ffc107;
-    /* Gold color */
-}
-
-.star-rating input:checked~label~label {
-    color: #ffc107;
-    /* Gold color */
-}
-
+.star-rating input:checked~label,
 .star-rating label:hover,
 .star-rating label:hover~label {
-    color: #ffeb3b;
-    /* Yellow color */
-}
-
-.star-rating input:hover~label {
-    color: #ddd;
-    /* Reset subsequent stars to default on hover */
-}
-
-.star-rating input:checked:hover~label {
     color: #ffc107;
     /* Gold color */
-}
-
-.form-group {
-    margin-bottom: 15px;
-}
-
-.char-counter {
-    font-size: 0.9rem;
-    color: #666;
-    text-align: right;
-}
-
-.file-drop-area {
-    position: relative;
-    display: flex;
-    align-items: center;
-    width: 100%;
-    max-width: 100%;
-    padding: 25px;
-    border: 1px dashed #ddd;
-    border-radius: 3px;
-    transition: 0.2s;
-    text-align: center;
-}
-
-.fake-btn {
-    flex-shrink: 0;
-    background-color: #007bff;
-    color: white;
-    padding: 10px 15px;
-    margin-right: 10px;
-    border-radius: 3px;
-    cursor: pointer;
-}
-
-.file-msg {
-    font-size: 1.2rem;
-    font-weight: 300;
-    color: #666;
-}
-
-.file-input {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    opacity: 0;
-    cursor: pointer;
-}
-
-.file-input:hover+.fake-btn,
-.file-input:focus+.fake-btn {
-    background-color: #0056b3;
-}
-
-#formulario-comentarios {
-    border: 1px solid #ddd;
-    border-radius: 10px;
-    padding: 20px;
-    margin-top: 20px;
 }
