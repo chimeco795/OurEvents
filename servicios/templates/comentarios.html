@@ -12,17 +12,37 @@
 <body>
     <div class="container mt-4">
         <h1 class="text-center mb-4">Comentarios</h1>
+        <div class="row">
+            <!-- Columna izquierda: Estadísticas de opiniones -->
+            <div class="col-md-4">
+                <h2>Opiniones</h2>
+                <p>Promedio de estrellas: {{ promedio|floatformat:1 }}</p>
+                <ul class="list-group">
+                    {% for estrella, porcentaje in porcentaje_estrellas.items %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            {{ estrella }} estrellas
+                            <span class="badge badge-primary badge-pill">{{ porcentaje|floatformat:0 }}%</span>
+                        </li>
+                    {% endfor %}
+                </ul>
+                <button class="btn btn-primary mt-3" onclick="mostrarFormulario()">Escribir mi opinión</button>
+            </div>
 
-        <!-- Formulario de comentarios -->
-        <div class="mb-4">
-            {% include 'capturar_comentarios.html' %}
+            <!-- Columna derecha: Lista de comentarios -->
+            <div class="col-md-8" id="lista-comentarios">
+                <h2>Comentarios Recientes</h2>
+                <div id="comentarios-lista">
+                    {% include 'ver_comentarios.html' %}
+                </div>
+            </div>
         </div>
 
-        <!-- Mostrar comentarios -->
-        <div>
-            <h2>Comentarios Recientes</h2>
-            <div id="comentarios-lista">
-                {% include 'ver_comentarios.html' %}
+        <!-- Formulario de comentarios en ventana completa -->
+        <div id="formulario-comentarios" style="display: none;">
+            <div class="card">
+                <div class="card-body">
+                    {% include 'capturar_comentarios.html' %}
+                </div>
             </div>
         </div>
     </div>
@@ -79,6 +99,16 @@
                 });
             });
         });
+
+        function mostrarFormulario() {
+            document.getElementById('lista-comentarios').style.display = 'none';
+            document.getElementById('formulario-comentarios').style.display = 'block';
+        }
+
+        function ocultarFormulario() {
+            document.getElementById('lista-comentarios').style.display = 'block';
+            document.getElementById('formulario-comentarios').style.display = 'none';
+        }
     </script>
 </body>
 </html>

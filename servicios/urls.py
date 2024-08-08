@@ -1,5 +1,4 @@
 # OurEvents/urls.py
-
 from django.contrib import admin
 from django.urls import path
 from servicios import views  # Importar las vistas desde la aplicación 'servicios'
