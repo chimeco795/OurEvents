@@ -1,3 +1,4 @@
+/*styles.css */
 .checked {
     color: orange;
 }
@@ -5,41 +6,4 @@
 .card-body img {
     max-width: 100%;
     height: auto;
-}
-
-
-
-
-
-/* ##################### Comentarios */
-.star-rating {
-    direction: ltr;
-    display: inline-flex;
-    justify-content: flex-start;
-    font-size: 1.5rem;
-    user-select: none;
-}
-
-.star-rating input {
-    display: none;
-}
-
-.star-rating label {
-    color: #ddd;
-    cursor: pointer;
-    font-size: 1.5rem;
-    margin: 0 2px;
-    transition: color 0.2s ease-in-out;
-}
-
-.star-rating label:before {
-    content: '★';
-    /* Unicode star character */
-}
-
-.star-rating input:checked~label,
-.star-rating label:hover,
-.star-rating label:hover~label {
-    color: #ffc107;
-    /* Gold color */
 }

@@ -1,39 +1,77 @@
 {% extends 'base.html' %}
 
 {% block title %}Comentarios{% endblock %}
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/comentarios.css' %}">
+<script src="{% static 'js/comentarios.js' %}"></script>
 
 {% block content %}
-    <div class="row">
-        <!-- Columna izquierda: Estadísticas de opiniones -->
-        <div class="col-md-4">
-            <h2>Opiniones</h2>
-            <p>Promedio de estrellas: {{ promedio|floatformat:1 }}</p>
-            <ul class="list-group">
-                {% for estrella, porcentaje in porcentaje_estrellas.items %}
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        {{ estrella }} estrellas
-                        <span class="badge badge-primary badge-pill">{{ porcentaje|floatformat:0 }}%</span>
-                    </li>
-                {% endfor %}
-            </ul>
-            <button class="btn btn-primary mt-3" onclick="mostrarFormulario()">Escribir mi opinión</button>
+    <div class="container mt-4">
+        <div class="row">
+            <!-- Columna izquierda: Estadísticas de opiniones -->
+            <div class="col-md-4">
+                <h2>Opiniones</h2>
+                <p>Promedio de estrellas: {{ promedio|floatformat:1 }}</p>
+                <ul class="list-group">
+                    {% for estrella, porcentaje in porcentaje_estrellas.items %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            {{ estrella }} estrellas
+                            <span class="badge badge-primary badge-pill">{{ porcentaje|floatformat:0 }}%</span>
+                        </li>
+                    {% endfor %}
+                </ul>
+                <button id="toggle-button" class="btn btn-primary mt-3" onclick="toggleFormulario()">Escribir mi opinión</button>
+            </div>
+
+            <!-- Columna derecha: Lista de comentarios -->
+            <div class="col-md-8" id="lista-comentarios">
+                <h2>Opiniones recientes</h2>
+                <div id="comentarios-lista">
+                    {% include 'comentarios/ver_comentarios.html' %}
+                </div>
+            </div>
         </div>
 
-        <!-- Columna derecha: Lista de comentarios -->
-        <div class="col-md-8" id="lista-comentarios">
-            <h2>Opiniones recientes</h2>
-            <div id="comentarios-lista">
-                {% include 'comentarios/ver_comentarios.html' %}
+        <!-- Formulario de comentarios en ventana completa -->
+        <div id="formulario-comentarios" style="display: none;" class="mt-4">
+            <div class="card">
+                <div class="card-body">
+                    {% include 'comentarios/capturar_comentarios.html' %}
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Formulario de comentarios en ventana completa -->
-    <div id="formulario-comentarios" style="display: none;">
-        <div class="card">
-            <div class="card-body">
-                {% include 'comentarios/capturar_comentarios.html' %}
-            </div>
-        </div>
-    </div>
+    <script>
+        function toggleFormulario() {
+            var formulario = document.getElementById('formulario-comentarios');
+            var listaComentarios = document.getElementById('lista-comentarios');
+            var toggleButton = document.getElementById('toggle-button');
+
+            if (formulario.style.display === 'none') {
+                formulario.style.display = 'block';
+                listaComentarios.style.display = 'none';
+                toggleButton.textContent = 'Cancelar mi opinión';
+                toggleButton.classList.remove('btn-primary');
+                toggleButton.classList.add('btn-secondary');
+            } else {
+                cancelarFormulario();
+            }
+        }
+
+        function cancelarFormulario() {
+            var formulario = document.getElementById('formulario-comentarios');
+            var listaComentarios = document.getElementById('lista-comentarios');
+            var toggleButton = document.getElementById('toggle-button');
+
+            formulario.style.display = 'none';
+            listaComentarios.style.display = 'block';
+            toggleButton.textContent = 'Escribir mi opinión';
+            toggleButton.classList.remove('btn-secondary');
+            toggleButton.classList.add('btn-primary');
+
+            // Limpiar el formulario
+            document.getElementById('comentario-form').reset();
+        }
+    </script>
 {% endblock %}

@@ -16,6 +16,7 @@
 
 .progress-bar {
     background-color: #007bff;
+    transition: width 0.4s ease;
 }
 
 .form-check-label i {

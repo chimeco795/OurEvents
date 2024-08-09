@@ -3,12 +3,18 @@
     <div class="form-group">
         <label for="titulo">Agregar un título:</label>
         <input type="text" class="form-control" id="titulo" name="titulo" placeholder="¿Qué es lo más importante para compartir?" required maxlength="20">
-        <div class="char-counter" id="titulo-counter">0 / 20</div>
+        <div class="char-counter" id="titulo-counter">20 / 20</div>
+        <div class="progress">
+            <div class="progress-bar" id="titulo-progress"></div>
+        </div>
     </div>
     <div class="form-group">
         <label for="nombre">Nombre:</label>
-        <input type="text" class="form-control" id="nombre" name="nombre" required maxlength="25">
-        <div class="char-counter" id="nombre-counter">0 / 25</div>
+        <input type="text" class="form-control" id="nombre" name="nombre" placeholder="Ejemplo: Juan Pérez" required maxlength="25">
+        <div class="char-counter" id="nombre-counter">25 / 25</div>
+        <div class="progress">
+            <div class="progress-bar" id="nombre-progress"></div>
+        </div>
     </div>
     <div class="form-group">
         <label for="calificacion">Calificación general:</label>
@@ -21,7 +27,10 @@
     <div class="form-group">
         <label for="comentario">Agregar un comentario escrito:</label>
         <textarea class="form-control" id="comentario" name="comentario" rows="3" placeholder="¿Qué te gustó o qué no te gustó?¿Para qué usaste este producto?" required maxlength="150"></textarea>
-        <div class="char-counter" id="comentario-counter">0 / 150</div>
+        <div class="char-counter" id="comentario-counter">150 / 150</div>
+        <div class="progress">
+            <div class="progress-bar" id="comentario-progress"></div>
+        </div>
     </div>
     <div class="form-group file-upload">
         <label for="imagen">Agregar una foto o video:</label>
@@ -31,8 +40,8 @@
             <input class="file-input" type="file" id="imagen" name="imagen">
         </div>
     </div>
-    <div class="form-group d-flex justify-content-end">
-        <button type="button" class="btn btn-secondary mr-2" onclick="ocultarFormulario()">Cancelar</button>
+    <div class="text-right mt-3">
+        <button type="button" class="btn btn-secondary" onclick="cancelarFormulario()">Cancelar</button>
         <button type="submit" class="btn btn-primary">Enviar</button>
     </div>
 </form>

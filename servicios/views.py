@@ -1,10 +1,31 @@
 from django.shortcuts import render, redirect
 from .models import Categoria, Producto, Comentario
 from django.db.models import Avg, Count
-from django.shortcuts import render
 from django.core.mail import send_mail
 from django.contrib import messages
-from django.conf import settings
+from django.http import HttpResponse
+
+def contacto(request):
+    if request.method == 'POST':
+        nombre = request.POST.get('nombre')
+        correo = request.POST.get('correo')  # Cambiado a 'correo'
+        telefono = request.POST.get('telefono')
+        asunto = request.POST.get('asunto')
+        mensaje = request.POST.get('mensaje')
+        whatsapp = request.POST.get('whatsapp')
+
+        # Aquí puedes agregar la lógica para enviar el correo, guardar en base de datos, etc.
+        send_mail(
+            asunto,
+            mensaje,
+            correo,
+            ['destinatario@ourevents.com'],  # Cambia esto por la dirección de correo a la que deseas enviar el mensaje
+        )
+
+        return HttpResponse('Gracias por contactarnos. Te responderemos pronto.')
+
+    return render(request, 'contacto.html')
+
 
 
 def home(request):
@@ -43,24 +64,36 @@ def capturar_comentarios(request):
         return redirect('ver_comentarios')
     return render(request, 'capturar_comentarios.html')
 
+
+
 def contacto(request):
     if request.method == 'POST':
-        nombre = request.POST['nombre']
-        email = request.POST['email']
-        asunto = request.POST['asunto']
-        mensaje = request.POST['mensaje']
+        nombre = request.POST.get('nombre')
+        correo = request.POST.get('correo')  # Cambiado a 'correo'
+        telefono = request.POST.get('telefono')
+        asunto = request.POST.get('asunto')
+        mensaje = request.POST.get('mensaje')
+        whatsapp = request.POST.get('whatsapp')
 
-        # Enviar un correo electrónico
+        # Aquí puedes agregar la lógica para enviar el correo, guardar en base de datos, etc.
         send_mail(
-            f"Mensaje de {nombre}: {asunto}",  # Asunto del correo
-            mensaje,  # Cuerpo del correo
-            email,  # Remitente
-            [settings.EMAIL_HOST_USER],  # Destinatario (configurado en settings.py)
-            fail_silently=False,
+            asunto,
+            mensaje,
+            correo,
+            ['destinatario@ourevents.com'],  # Cambia esto por la dirección de correo a la que deseas enviar el mensaje
         )
 
-        # Mostrar mensaje de éxito
-        messages.success(request, 'Gracias por contactarnos. Tu mensaje ha sido enviado.')
-        return render(request, 'contacto.html')
+        return HttpResponse('Gracias por contactarnos. Te responderemos pronto.')
 
     return render(request, 'contacto.html')
+
+
+def send_test_email(request):
+    send_mail(
+        'Prueba de correo electrónico',
+        'Este es un correo de prueba enviado desde Django.',
+        'chimecoo@gmail.com',  # De
+        ['cars795@hotmail.com'],  # Para
+        fail_silently=False,
+    )
+    return HttpResponse('Correo enviado con éxito.')
