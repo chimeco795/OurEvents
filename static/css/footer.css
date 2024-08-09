@@ -1,0 +1,20 @@
+/* Footer flotante */
+.floating-footer {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    background-color: #f8f9fa;
+    padding: 10px 0;
+    z-index: 1000;
+    box-shadow: 0px -2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Estilos de iconos más pequeños */
+.floating-footer .social-media i {
+    font-size: 1.5rem;
+}
+
+.floating-footer .social-media span {
+    font-size: 0.9rem;
+    margin-left: 5px;
+}

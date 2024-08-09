@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
     <script src="{% static 'js/scripts.js' %}"></script>
     <link rel="stylesheet" href="{% static 'css/contacto.css' %}">
+    <link rel="stylesheet" href="{% static 'css/footer.css' %}">
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
@@ -41,7 +42,7 @@
         {% block content %}{% endblock %}
     </div>
 
-    <footer class="text-center mt-4">
+    <footer class="text-center mt-4 {% if floating_footer %}floating-footer{% endif %}">
         {% block footer %}
         {% include 'footer.html' %}
         {% endblock %}

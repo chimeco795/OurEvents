@@ -65,7 +65,6 @@ def capturar_comentarios(request):
     return render(request, 'capturar_comentarios.html')
 
 
-
 def contacto(request):
     if request.method == 'POST':
         nombre = request.POST.get('nombre')
@@ -85,7 +84,7 @@ def contacto(request):
 
         return HttpResponse('Gracias por contactarnos. Te responderemos pronto.')
 
-    return render(request, 'contacto.html')
+    return render(request, 'contacto.html',{'floating_footer': True})
 
 
 def send_test_email(request):

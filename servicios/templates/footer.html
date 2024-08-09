@@ -2,26 +2,24 @@
 
 <footer class="text-center mt-4">
     <p>&copy; 2024 Mi Evento. Todos los derechos reservados.</p>
-<!-- Estilo con Fondo Transparente y Bordes -->
-<div class="social-media mb-4">
-    <a href="https://www.facebook.com" target="_blank" class="me-3">
-        <i class="fab fa-facebook fa-2x border border-primary text-primary p-2 rounded-circle"></i>
-    </a>
-    <a href="https://www.twitter.com" target="_blank" class="me-3">
-        <i class="fab fa-twitter fa-2x border border-info text-info p-2 rounded-circle"></i>
-    </a>
-    <a href="https://www.instagram.com" target="_blank" class="me-3">
-        <i class="fab fa-instagram fa-2x border border-danger text-danger p-2 rounded-circle"></i>
-    </a>
-    <a href="https://www.linkedin.com" target="_blank" class="me-3">
-        <i class="fab fa-linkedin fa-2x border border-primary text-primary p-2 rounded-circle"></i>
-    </a>
-</div>
-
-
-
-
-
+    <div class="social-media mb-4">
+        <a href="https://www.facebook.com" target="_blank" class="me-3">
+            <i class="fab fa-facebook fa-2x border border-primary text-primary p-2 rounded-circle"></i> 
+            {% if floating_footer %}<span> @ourevents</span>{% endif %}
+        </a>
+        <a href="https://www.twitter.com" target="_blank" class="me-3">
+            <i class="fab fa-twitter fa-2x border border-info text-info p-2 rounded-circle"></i> 
+            {% if floating_footer %}<span> @ourevents</span>{% endif %}
+        </a>
+        <a href="https://www.instagram.com" target="_blank" class="me-3">
+            <i class="fab fa-instagram fa-2x border border-danger text-danger p-2 rounded-circle"></i> 
+            {% if floating_footer %}<span> @ourevents</span>{% endif %}
+        </a>
+        <a href="https://www.linkedin.com" target="_blank" class="me-3">
+            <i class="fab fa-linkedin fa-2x border border-primary text-primary p-2 rounded-circle"></i> 
+            {% if floating_footer %}<span> @ourevents</span>{% endif %}
+        </a>
+    </div>
 </footer>
 
 <!-- Incluye Font Awesome desde CDN -->
