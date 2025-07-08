@@ -115,3 +115,7 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'chimecoo@gmail.com'  # Tu dirección de correo de Gmail
 EMAIL_HOST_PASSWORD = 'Tarpeya500'    # Tu contraseña de Gmail
+
+LOGIN_REDIRECT_URL = '/accounts/profile/'
+LOGOUT_REDIRECT_URL = '/login/'
+

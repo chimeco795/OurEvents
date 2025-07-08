@@ -1,5 +1,5 @@
 #models.py
-
+from django.contrib.auth.models import User
 from django.db import models
 from datetime import date
 
@@ -26,3 +26,10 @@ class Comentario(models.Model):
     imagen = models.ImageField(upload_to='comentarios/', blank=True, null=True)
     calificacion = models.PositiveIntegerField()
     fecha = models.DateField()
+
+class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    photo = models.ImageField(upload_to='profiles/', blank=True, null=True)
+
+    def __str__(self):
+        return f'Perfil de {self.user.username}'

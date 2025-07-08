@@ -4,7 +4,12 @@ from django.db.models import Avg, Count
 from django.core.mail import send_mail
 from django.contrib import messages
 from django.http import HttpResponse
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render
 
+ 
+
+@login_required
 def contacto(request):
     if request.method == 'POST':
         nombre = request.POST.get('nombre')
@@ -96,3 +101,8 @@ def send_test_email(request):
         fail_silently=False,
     )
     return HttpResponse('Correo enviado con éxito.')
+
+@login_required
+def perfil_usuario(request):
+    return render(request, 'accounts/profile.html')
+ 
