@@ -1,0 +1,8 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>{{ proveedor.nombre }} · Productos e inventario</h1>
+<p><a href="{% url 'gestion_producto_nuevo' proveedor.pk %}">Agregar producto</a> · <a href="{% url 'gestion_negocio' proveedor.pk %}">Datos del negocio</a></p>
+<div class="table-responsive"><table class="table"><thead><tr><th>Producto</th><th>Precio</th><th>Stock</th><th>Disponibilidad</th></tr></thead><tbody>
+{% for producto in productos %}<tr><td><a href="{% url 'gestion_producto_editar' proveedor.pk producto.pk %}">{{ producto.nombre }}</a></td><td>{{ producto.precio }}</td><td>{{ producto.stock }}</td><td>{{ producto.disponibilidad }}</td></tr>{% empty %}<tr><td colspan="4">No hay productos.</td></tr>{% endfor %}
+</tbody></table></div>
+{% endblock %}

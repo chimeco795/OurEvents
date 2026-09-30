@@ -2,7 +2,6 @@ from django.contrib import admin
 from servicios import views  # Importar las vistas desde la aplicación 'servicios'
 from django.urls import path, include
 from django.contrib.auth import views as auth_views
-from servicios.views import send_test_email  # Importa la vista desde la aplicación correcta
 
 
 urlpatterns = [
@@ -27,6 +26,10 @@ urlpatterns = [
     path('comentarios/', views.ver_comentarios, name='ver_comentarios'),
     path('comentarios/nuevo/', views.capturar_comentarios, name='capturar_comentarios'),
     path('contacto/', views.contacto, name='contacto'),
-    path('enviar-correo/', send_test_email, name='send_test_email'),  # Ruta para enviar el correo
     
 ]
+from django.conf import settings
+from django.conf.urls.static import static
+urlpatterns += [path('gestion/', include('servicios.urls'))]
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

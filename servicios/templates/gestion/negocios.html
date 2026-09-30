@@ -1,0 +1,5 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Mis negocios</h1>
+{% for proveedor in proveedores %}<p><a href="{% url 'gestion_productos' proveedor.pk %}">{{ proveedor.nombre }}</a></p>{% empty %}<p>No tienes negocios activos asignados. Contacta al administrador.</p>{% endfor %}
+{% endblock %}

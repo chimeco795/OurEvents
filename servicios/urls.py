@@ -1,12 +1,10 @@
-# OurEvents/urls.py
-from django.contrib import admin
-from servicios import views  # Importar las vistas desde la aplicación 'servicios'
-from django.urls import path,  
+from django.urls import path
+from . import views
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('', views.home, name='home'), 
-    path('catalogo/', views.catalogo, name='catalogo'),
-    path('comentarios/', views.ver_comentarios, name='ver_comentarios'),
-    path('comentarios/nuevo/', views.capturar_comentarios, name='capturar_comentarios'),
+    path('', views.negocios, name='gestion_negocios'),
+    path('<int:proveedor_id>/productos/', views.productos, name='gestion_productos'),
+    path('<int:proveedor_id>/datos/', views.editar_negocio, name='gestion_negocio'),
+    path('<int:proveedor_id>/productos/nuevo/', views.editar_producto, name='gestion_producto_nuevo'),
+    path('<int:proveedor_id>/productos/<int:producto_id>/', views.editar_producto, name='gestion_producto_editar'),
 ]

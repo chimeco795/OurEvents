@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>{{ titulo }}</h1>
+<form method="post" enctype="multipart/form-data">
+{% csrf_token %}
+{{ form.as_p }}
+{% if imagenes %}<h2>Imágenes</h2>{{ imagenes.management_form }}{{ imagenes.non_form_errors }}{% for imagen in imagenes %}{{ imagen.as_p }}{% endfor %}{% endif %}
+<button class="btn btn-primary" type="submit">Guardar</button>
+</form>
+{% endblock %}
