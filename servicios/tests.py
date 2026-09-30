@@ -61,7 +61,7 @@ class DominioTests(TestCase):
         primera = ProductoImagen.objects.create(producto=propio, imagen='primera.jpg', principal=True)
         segunda = ProductoImagen.objects.create(producto=propio, imagen='segunda.jpg')
         datos = self.datos()
-        datos.update({'imagenes-TOTAL_FORMS': 3, 'imagenes-INITIAL_FORMS': 2,
+        datos.update({'stock_anterior': propio.stock, 'imagenes-TOTAL_FORMS': 3, 'imagenes-INITIAL_FORMS': 2,
                       'imagenes-0-id': primera.pk, 'imagenes-0-orden': 0,
                       'imagenes-1-id': segunda.pk, 'imagenes-1-orden': 1,
                       'imagenes-1-principal': 'on', 'imagenes-2-orden': 0})
@@ -139,7 +139,7 @@ class MigracionTests(TransactionTestCase):
     def test_conserva_catalogo_legacy(self):
         executor = MigrationExecutor(connection)
         old = [('servicios', '0004_profile')]
-        latest = [('servicios', '0007_alter_categoria_slug_alter_girocomercial_slug_and_more')]
+        latest = executor.loader.graph.leaf_nodes('servicios')
         executor.migrate(old)
         apps = executor.loader.project_state(old).apps
         categoria = apps.get_model('servicios', 'Categoria').objects.create(nombre='Legado')

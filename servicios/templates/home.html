@@ -1,29 +1,7 @@
-{% extends 'base.html' %}
-
-{% block title %}Home{% endblock %}
-
-{% block content %}
-    <h1 class="text-center mb-4">Bienvenido a Mi Evento</h1>
-    <div class="row">
-        {% for categoria in categorias %}
-            <div class="col-md-4 mb-4">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">{{ categoria.nombre }}</h5>
-                        <ul class="list-group list-group-flush">
-                            {% for producto in productos %}
-                                {% if producto.categoria == categoria %}
-                                    <li class="list-group-item">{{ producto.nombre }} - ${{ producto.precio }}</li>
-                                {% endif %}
-                            {% endfor %}
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        {% endfor %}
-    </div>
-    <!-- Botón para ver comentarios -->
-    <div class="text-center mt-4">
-        <a href="{% url 'ver_comentarios' %}" class="btn btn-primary">Ver Comentarios</a>
-    </div>
-{% endblock %}
+{% extends 'base.html' %}{% load static %}{% block content %}
+<section class="hero"><div class="hero-copy"><div class="eyebrow">Lo que necesitas, más cerca</div><h1>Encuentra productos.<br>Conecta con tu comunidad.</h1><p>Descubre negocios, compara y crea tu solicitud. Todo empieza con una buena conexión.</p><form class="hero-search" action="{% url 'buscar' %}"><label class="sr-only" for="busqueda-home">Buscar en OurEvents</label><input id="busqueda-home" name="q" placeholder="Pan artesanal, flores, decoración…"><button>Explorar →</button></form></div><div class="hero-art"><img src="{% static 'images/marketplace-hero.svg' %}" alt="Ilustración de productos y una tienda local"></div></section>
+<section id="categorias"><div class="section-head"><h2>¿Qué estás buscando?</h2><a href="{% url 'catalogo' %}">Ver todo →</a></div><div class="category-grid">{% for categoria in categorias %}<a class="category-card" href="{% url 'catalogo' %}?categoria={{ categoria.pk }}"><span aria-hidden="true">{% cycle '◈' '❋' '◇' '⌂' '✦' '◉' '✧' '▧' %}</span>{{ categoria.nombre }}</a>{% empty %}<p class="empty">Pronto encontrarás nuevas categorías.</p>{% endfor %}</div></section>
+<section class="section"><div class="section-head"><div><div class="eyebrow">Personas detrás de cada producto</div><h2>Negocios que vale la pena conocer</h2></div></div><div class="grid">{% for proveedor in proveedores %}{% include 'components/proveedor.html' %}{% empty %}<p class="empty">Estamos preparando nuestros primeros negocios.</p>{% endfor %}</div></section>
+<section class="section"><div class="section-head"><h2>Una selección para ti</h2><a href="{% url 'catalogo' %}">Explorar catálogo →</a></div><div class="grid">{% for producto in destacados %}{% include 'components/producto.html' %}{% empty %}<p class="empty">Descubre las novedades en nuestro catálogo.</p>{% endfor %}</div></section>
+<section class="section"><div class="section-head"><h2>Favoritos de la comunidad</h2><a href="{% url 'catalogo' %}?orden=valoracion">Mejor valorados →</a></div><div class="grid">{% for producto in mejores %}{% include 'components/producto.html' %}{% empty %}<p class="empty">Las primeras opiniones verificadas aparecerán aquí.</p>{% endfor %}</div></section>
+<div class="trust-strip"><span>✓ Negocios con identidad propia</span><span>★ Opiniones de órdenes completadas</span><span>↔ Acuerdos directos con el proveedor</span></div>{% endblock %}

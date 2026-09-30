@@ -1,3 +1,7 @@
+# Documento histórico de fase 1
+
+La implementación vigente de fase 2 se describe en [fase-dos.md](fase-dos.md) y en el README.
+
 # Análisis y evolución del dominio
 
 ## Repositorio encontrado

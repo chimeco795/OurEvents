@@ -1,10 +1,1 @@
-{% extends 'base.html' %}
-{% block content %}
-<h1>Catálogo OurEvents</h1>
-<div class="row">
-{% for producto in productos %}<article class="col-md-4 mb-4"><div class="card h-100">
-{% if producto.imagen_portada %}<img src="{{ producto.imagen_portada.url }}" alt="{{ producto.nombre }}" class="card-img-top">{% endif %}
-<div class="card-body"><h2 class="h5">{{ producto.nombre }}</h2><p>{{ producto.proveedor.nombre }}</p><p>{{ producto.descripcion_corta|default:producto.descripcion }}</p><p>${{ producto.precio }} · {{ producto.disponibilidad }}</p></div>
-</div></article>{% empty %}<p>Próximamente habrá productos disponibles.</p>{% endfor %}
-</div>
-{% endblock %}
+{% extends 'base.html' %}{% block content %}<div class="page-heading"><div class="eyebrow">Descubre OurEvents</div><h1>{% if request.GET.q %}Resultados para “{{ request.GET.q }}”{% else %}Productos con algo especial{% endif %}</h1><p class="muted">Encuentra tu próximo favorito y habla directamente con quien lo hace posible.</p></div><div class="layout"><aside class="filters"><h2>Filtrar</h2><form method="get">{{ form.as_p }}<button>Aplicar filtros</button><a class="button secondary" href="{% url 'catalogo' %}">Limpiar</a></form></aside><div>{% if proveedores %}<h2>Proveedores encontrados</h2><div class="grid">{% for proveedor in proveedores %}{% include 'components/proveedor.html' %}{% endfor %}</div><nav class="pagination" aria-label="Páginas de proveedores">{% if proveedores.has_previous %}<a href="?q={{ request.GET.q|urlencode }}&proveedores_page={{ proveedores.previous_page_number }}">Negocios anteriores</a>{% endif %}{% if proveedores.has_next %}<a href="?q={{ request.GET.q|urlencode }}&proveedores_page={{ proveedores.next_page_number }}">Más negocios</a>{% endif %}</nav><hr>{% endif %}<div class="results-heading"><strong>{{ page_obj.paginator.count }} productos</strong><span class="muted">Solicita sin pagar en línea</span></div><div class="grid">{% for producto in page_obj %}{% include 'components/producto.html' %}{% empty %}<div class="empty"><h2>No encontramos resultados</h2><p>Prueba otra palabra o elimina algunos filtros.</p><a href="{% url 'catalogo' %}">Ver todo el catálogo</a></div>{% endfor %}</div>{% include 'components/paginacion.html' %}</div></div>{% endblock %}

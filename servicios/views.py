@@ -10,18 +10,6 @@ from .forms import ProductoForm, ProveedorForm, ImagenFormSet, ComentarioForm, C
 from .permissions import obtener_proveedor, proveedores_administrables
 
 
-def productos_publicos():
-    return Producto.objects.filter(activo=True, proveedor__estado=Proveedor.Estado.ACTIVO, categoria__activa=True).select_related('proveedor', 'categoria').prefetch_related('imagenes')
-
-
-def home(request):
-    return render(request, 'home.html', {'categorias': Categoria.objects.filter(activa=True), 'productos': productos_publicos()})
-
-
-def catalogo(request):
-    return render(request, 'catalogo.html', {'productos': productos_publicos()})
-
-
 def ver_comentarios(request):
     comentarios = Comentario.objects.all()
     total = comentarios.count()
@@ -56,7 +44,7 @@ def contacto(request):
 
 @login_required
 def perfil_usuario(request):
-    return render(request, 'accounts/profile.html')
+    return redirect('cuenta')
 
 
 @login_required
@@ -67,7 +55,8 @@ def negocios(request):
 @login_required
 def productos(request, proveedor_id):
     proveedor = obtener_proveedor(request.user, proveedor_id)
-    return render(request, 'gestion/productos.html', {'proveedor': proveedor, 'productos': proveedor.productos.select_related('proveedor', 'categoria')})
+    from .marketplace_views import paginar
+    return render(request, 'gestion/productos.html', {'proveedor': proveedor, 'page_obj': paginar(request, proveedor.productos.select_related('proveedor', 'categoria').order_by('nombre'))})
 
 
 @login_required
@@ -91,18 +80,13 @@ def editar_producto(request, proveedor_id, producto_id=None):
         valido = form.is_valid()
         imagenes_validas = imagenes.is_valid()
         if valido and imagenes_validas:
-            with transaction.atomic():
-                form.save()
-                # Permite cambiar la imagen principal sin violar la restricción intermedia.
-                producto.imagenes.filter(principal=True).update(principal=False)
-                for imagen_form in imagenes.forms:
-                    if imagen_form.cleaned_data and not imagen_form.cleaned_data.get('DELETE'):
-                        imagen = imagen_form.save(commit=False)
-                        if imagen.imagen:
-                            imagen.producto = producto
-                            imagen.save()
-                    elif imagen_form.cleaned_data.get('DELETE') and imagen_form.instance.pk:
-                        imagen_form.instance.delete()
+            from .application.catalog import guardar_producto
+            from django.core.exceptions import ValidationError
+            try:
+                guardar_producto(request.user, form, imagenes)
+            except ValidationError as exc:
+                form.add_error(None, exc)
+                return render(request, 'gestion/formulario.html', {'form': form, 'imagenes': imagenes, 'titulo': 'Producto'})
             messages.success(request, 'Producto guardado.')
             return redirect('gestion_productos', proveedor_id=proveedor.pk)
     return render(request, 'gestion/formulario.html', {'form': form, 'imagenes': imagenes, 'titulo': 'Producto'})

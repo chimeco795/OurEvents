@@ -1,5 +1,1 @@
-{% extends 'base.html' %}
-{% block content %}
-<h1>Mis negocios</h1>
-{% for proveedor in proveedores %}<p><a href="{% url 'gestion_productos' proveedor.pk %}">{{ proveedor.nombre }}</a></p>{% empty %}<p>No tienes negocios activos asignados. Contacta al administrador.</p>{% endfor %}
-{% endblock %}
+{% extends 'base.html' %}{% block content %}<div class="page-heading"><h1>Mis negocios</h1><p class="muted">Elige el negocio que quieres administrar.</p></div><div class="grid">{% for proveedor in proveedores %}<a class="panel" href="{% url 'gestion_dashboard' proveedor.pk %}"><h2>{{ proveedor.nombre }}</h2><span>Ir al dashboard →</span></a>{% empty %}<div class="empty"><h2>Aún no tienes un negocio asignado</h2><p>Contacta al administrador para dar de alta tu negocio.</p></div>{% endfor %}</div>{% endblock %}

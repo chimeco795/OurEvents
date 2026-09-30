@@ -1,0 +1,1 @@
+<div>{% include 'components/estrellas.html' with promedio=reputacion.promedio total=reputacion.total %}{% for n,cantidad,porcentaje in reputacion.distribucion %}<div class="distribution"><span>{{ n }} ★</span><progress value="{{ porcentaje }}" max="100" aria-label="{{ n }} estrellas: {{ porcentaje }} por ciento"></progress><span>{{ porcentaje }}%</span></div>{% endfor %}</div>

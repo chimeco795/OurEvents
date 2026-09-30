@@ -64,6 +64,19 @@ class AdministradorProveedor(models.Model):
     usuario = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     activo = models.BooleanField(default=True)
 
+    def clean(self):
+        super().clean()
+        from servicios.application.memberships import validar_administrador
+        if self.proveedor_id:
+            validar_administrador(self)
+
+    def save(self, *args, **kwargs):
+        from django.db import transaction
+        with transaction.atomic():
+            Proveedor.objects.select_for_update().get(pk=self.proveedor_id)
+            self.clean()
+            super().save(*args, **kwargs)
+
     class Meta:
         constraints = [models.UniqueConstraint(fields=['proveedor', 'usuario'], name='administrador_proveedor_unico')]
 
@@ -136,8 +149,13 @@ class Producto(models.Model):
             raise ValidationError({'precio_promocional': 'La promoción no puede superar el precio.'})
 
     def save(self, *args, **kwargs):
-        asignar_slug(self)
-        super().save(*args, **kwargs)
+        from django.db import transaction
+        from servicios.application.memberships import validar_producto
+        with transaction.atomic():
+            Proveedor.objects.select_for_update().get(pk=self.proveedor_id)
+            validar_producto(self)
+            asignar_slug(self)
+            super().save(*args, **kwargs)
 
     @property
     def disponibilidad(self):
@@ -182,3 +200,147 @@ class Profile(models.Model):
 
     def __str__(self):
         return f'Perfil de {self.user.username}'
+
+
+class PlanMembresia(models.Model):
+    nombre = models.CharField(max_length=60, unique=True)
+    precio = models.DecimalField(max_digits=10, decimal_places=2, default=0, validators=[MinValueValidator(0)])
+    duracion_dias = models.PositiveIntegerField(default=30, validators=[MinValueValidator(1)])
+    max_productos = models.PositiveIntegerField(null=True, blank=True, help_text='Vacío: sin límite')
+    max_usuarios = models.PositiveIntegerField(null=True, blank=True)
+    promociones = models.BooleanField(default=False)
+    estadisticas = models.BooleanField(default=False)
+    activo = models.BooleanField(default=True)
+
+    def __str__(self):
+        return self.nombre
+
+
+class MembresiaProveedor(models.Model):
+    proveedor = models.ForeignKey(Proveedor, on_delete=models.CASCADE, related_name='membresias')
+    plan = models.ForeignKey(PlanMembresia, on_delete=models.PROTECT)
+    inicio = models.DateField(default=date.today)
+    fin = models.DateField()
+    activa = models.BooleanField(default=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['proveedor'], condition=Q(activa=True), name='una_membresia_activa'),
+            models.CheckConstraint(condition=Q(fin__gte=F('inicio')), name='vigencia_valida'),
+        ]
+
+
+def generar_folio():
+    return 'OE-' + uuid4().hex[:16].upper()
+
+
+class Orden(models.Model):
+    class Estado(models.TextChoices):
+        NUEVA = 'NUEVA', 'Nueva'
+        VISTA = 'VISTA', 'Vista'
+        ACEPTADA = 'ACEPTADA', 'Aceptada'
+        EN_PROCESO = 'EN_PROCESO', 'En proceso'
+        ATENDIDA = 'ATENDIDA', 'Atendida'
+        COMPLETADA = 'COMPLETADA', 'Completada'
+        RECHAZADA = 'RECHAZADA', 'Rechazada'
+        CANCELADA = 'CANCELADA', 'Cancelada'
+
+    folio = models.CharField(max_length=24, unique=True, default=generar_folio, editable=False)
+    comprador = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='ordenes')
+    proveedor = models.ForeignKey(Proveedor, on_delete=models.PROTECT, related_name='ordenes')
+    estado = models.CharField(max_length=12, choices=Estado.choices, default=Estado.NUEVA)
+    fecha_creacion = models.DateTimeField(auto_now_add=True)
+    fecha_modificacion = models.DateTimeField(auto_now=True)
+    subtotal = models.DecimalField(max_digits=14, decimal_places=2)
+    notas_comprador = models.TextField(blank=True)
+    notas_proveedor = models.TextField(blank=True)
+    clave_solicitud = models.UUIDField(default=uuid4, unique=True, editable=False)
+
+    class Meta:
+        ordering = ['-fecha_creacion', '-pk']
+        constraints = [models.CheckConstraint(condition=Q(subtotal__gte=0), name='orden_subtotal_positivo')]
+
+    def __str__(self):
+        return self.folio
+
+
+class OrdenDetalle(models.Model):
+    orden = models.ForeignKey(Orden, on_delete=models.CASCADE, related_name='detalles')
+    producto = models.ForeignKey(Producto, on_delete=models.PROTECT)
+    nombre_producto_historico = models.CharField(max_length=100)
+    cantidad = models.PositiveIntegerField(validators=[MinValueValidator(1), MaxValueValidator(999)])
+    precio_unitario = models.DecimalField(max_digits=10, decimal_places=2)
+    subtotal = models.DecimalField(max_digits=14, decimal_places=2)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['orden', 'producto'], name='producto_unico_en_orden'),
+            models.CheckConstraint(condition=Q(cantidad__gte=1, cantidad__lte=999), name='cantidad_orden_valida'),
+            models.CheckConstraint(condition=Q(precio_unitario__gte=0), name='detalle_precio_positivo'),
+            models.CheckConstraint(condition=Q(subtotal__gte=0), name='detalle_subtotal_positivo'),
+        ]
+
+
+class OpinionBase(models.Model):
+    class Moderacion(models.TextChoices):
+        PUBLICADA = 'publicada', 'Publicada'
+        OCULTA = 'oculta', 'Oculta'
+    usuario = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
+    orden = models.ForeignKey(Orden, on_delete=models.PROTECT)
+    estrellas = models.PositiveSmallIntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])
+    comentario = models.TextField(max_length=3000)
+    fecha = models.DateTimeField(auto_now_add=True)
+    estado = models.CharField(max_length=10, choices=Moderacion.choices, default=Moderacion.PUBLICADA)
+    respuesta = models.TextField(max_length=3000, blank=True)
+    fecha_respuesta = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        abstract = True
+        ordering = ['-fecha', '-pk']
+
+    @property
+    def compra_verificada(self):
+        return self.orden.estado == Orden.Estado.COMPLETADA and self.usuario_id == self.orden.comprador_id
+
+    def clean(self):
+        super().clean()
+        if self.orden_id and not self.compra_verificada:
+            raise ValidationError('Solo el comprador de una orden completada puede opinar.')
+
+
+class OpinionProducto(OpinionBase):
+    producto = models.ForeignKey(Producto, on_delete=models.PROTECT, related_name='opiniones')
+
+    class Meta(OpinionBase.Meta):
+        constraints = [models.UniqueConstraint(fields=['usuario', 'orden', 'producto'], name='opinion_producto_unica'), models.CheckConstraint(condition=Q(estrellas__gte=1, estrellas__lte=5), name='estrellas_producto_validas')]
+
+    def clean(self):
+        super().clean()
+        if self.orden_id and self.producto_id and not self.orden.detalles.filter(producto_id=self.producto_id).exists():
+            raise ValidationError('El producto no pertenece a la orden.')
+
+
+class OpinionProveedor(OpinionBase):
+    proveedor = models.ForeignKey(Proveedor, on_delete=models.PROTECT, related_name='opiniones')
+
+    class Meta(OpinionBase.Meta):
+        constraints = [models.UniqueConstraint(fields=['usuario', 'orden', 'proveedor'], name='opinion_proveedor_unica'), models.CheckConstraint(condition=Q(estrellas__gte=1, estrellas__lte=5), name='estrellas_proveedor_validas')]
+
+    def clean(self):
+        super().clean()
+        if self.orden_id and self.proveedor_id != self.orden.proveedor_id:
+            raise ValidationError('El proveedor no pertenece a la orden.')
+
+
+class Notificacion(models.Model):
+    usuario = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='notificaciones')
+    tipo = models.CharField(max_length=40)
+    titulo = models.CharField(max_length=150)
+    mensaje = models.TextField()
+    url = models.CharField(max_length=250)
+    leida = models.BooleanField(default=False)
+    fecha = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-fecha', '-pk']
+        indexes = [models.Index(fields=['usuario', 'leida'])]

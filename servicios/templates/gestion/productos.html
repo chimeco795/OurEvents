@@ -1,8 +1,1 @@
-{% extends 'base.html' %}
-{% block content %}
-<h1>{{ proveedor.nombre }} · Productos e inventario</h1>
-<p><a href="{% url 'gestion_producto_nuevo' proveedor.pk %}">Agregar producto</a> · <a href="{% url 'gestion_negocio' proveedor.pk %}">Datos del negocio</a></p>
-<div class="table-responsive"><table class="table"><thead><tr><th>Producto</th><th>Precio</th><th>Stock</th><th>Disponibilidad</th></tr></thead><tbody>
-{% for producto in productos %}<tr><td><a href="{% url 'gestion_producto_editar' proveedor.pk producto.pk %}">{{ producto.nombre }}</a></td><td>{{ producto.precio }}</td><td>{{ producto.stock }}</td><td>{{ producto.disponibilidad }}</td></tr>{% empty %}<tr><td colspan="4">No hay productos.</td></tr>{% endfor %}
-</tbody></table></div>
-{% endblock %}
+{% extends 'base.html' %}{% block content %}<div class="page-heading"><h1>Mis productos</h1><p class="muted">{{ proveedor.nombre }}</p></div>{% include 'components/gestion_nav.html' %}<div class="toolbar"><a class="button" href="{% url 'gestion_producto_nuevo' proveedor.pk %}">+ Agregar producto</a></div><div class="table-wrap"><table><thead><tr><th>Producto</th><th>Precio</th><th>Stock</th><th>Disponibilidad</th><th>Acción</th></tr></thead><tbody>{% for producto in page_obj %}<tr><td>{{ producto.nombre }}</td><td>${{ producto.precio }}</td><td>{{ producto.stock }}</td><td><span class="badge">{{ producto.disponibilidad }}</span></td><td><a href="{% url 'gestion_producto_editar' proveedor.pk producto.pk %}">Editar →</a></td></tr>{% empty %}<tr><td colspan="5">No hay productos. Agrega el primero para empezar.</td></tr>{% endfor %}</tbody></table></div>{% include 'components/paginacion.html' %}{% endblock %}

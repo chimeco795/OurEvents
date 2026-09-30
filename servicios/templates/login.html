@@ -1,15 +1,1 @@
-{% extends "base.html" %}
-{% block title %}Iniciar sesión{% endblock %}
-
-{% block content %}
-<div class="row justify-content-center">
-  <div class="col-md-4">
-    <h2>Iniciar sesión</h2>
-    <form method="post">
-      {% csrf_token %}
-      {{ form.as_p }}
-      <button type="submit" class="btn btn-primary">Entrar</button>
-    </form>
-  </div>
-</div>
-{% endblock %}
+{% extends 'base.html' %}{% block content %}<section class="panel form-panel"><div class="eyebrow">Bienvenido de nuevo</div><h1>Tu comunidad te espera.</h1><p class="muted">Entra para seguir tus órdenes o administrar tu negocio.</p><form method="post">{% csrf_token %}{{ form.as_p }}<input type="hidden" name="next" value="{{ next }}"><button>Entrar →</button></form><p></p><a href="{% url 'registro' %}">¿Primera vez? Crea tu cuenta</a></section>{% endblock %}

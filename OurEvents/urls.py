@@ -1,4 +1,5 @@
 from django.contrib import admin
+from servicios import marketplace_views
 from servicios import views  # Importar las vistas desde la aplicación 'servicios'
 from django.urls import path, include
 from django.contrib.auth import views as auth_views
@@ -6,7 +7,7 @@ from django.contrib.auth import views as auth_views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', views.home, name='home'),
+    path('', marketplace_views.home, name='home'),
 
     # Autenticación
     path('login/', auth_views.LoginView.as_view(template_name='login.html'), name='login'),
@@ -22,7 +23,7 @@ urlpatterns = [
  
    
     # Otras rutas
-    path('catalogo/', views.catalogo, name='catalogo'),
+    path('catalogo/', marketplace_views.catalogo, name='catalogo'),
     path('comentarios/', views.ver_comentarios, name='ver_comentarios'),
     path('comentarios/nuevo/', views.capturar_comentarios, name='capturar_comentarios'),
     path('contacto/', views.contacto, name='contacto'),
@@ -30,6 +31,6 @@ urlpatterns = [
 ]
 from django.conf import settings
 from django.conf.urls.static import static
-urlpatterns += [path('gestion/', include('servicios.urls'))]
+urlpatterns += [path('', include('servicios.marketplace_urls')), path('gestion/', include('servicios.urls'))]
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
