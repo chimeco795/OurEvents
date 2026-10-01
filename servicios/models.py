@@ -44,6 +44,12 @@ class Proveedor(models.Model):
     whatsapp = models.CharField(max_length=30, blank=True)
     sitio_web = models.URLField(blank=True)
     ubicacion = models.CharField(max_length=250, blank=True)
+    horario = models.CharField(max_length=250, blank=True)
+    zona_cobertura = models.CharField(max_length=250, blank=True)
+    pedido_minimo = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, validators=[MinValueValidator(0)])
+    tiempo_preparacion = models.CharField(max_length=200, blank=True)
+    formas_entrega = models.TextField(blank=True, max_length=1000)
+    metodos_pago_informativos = models.TextField(blank=True, max_length=1000)
     estado = models.CharField(max_length=12, choices=Estado.choices, default=Estado.INACTIVO)
     fecha_alta = models.DateTimeField(auto_now_add=True)
     verificado = models.BooleanField(default=False)
@@ -61,21 +67,29 @@ class Proveedor(models.Model):
 
 class AdministradorProveedor(models.Model):
     proveedor = models.ForeignKey(Proveedor, on_delete=models.CASCADE, related_name='accesos')
-    usuario = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    usuario = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
     activo = models.BooleanField(default=True)
+    es_principal = models.BooleanField(default=False)
 
     def clean(self):
         super().clean()
         from servicios.application.memberships import validar_administrador
         if self.proveedor_id:
             validar_administrador(self)
+            from servicios.application.providers import validar_continuidad_equipo
+            validar_continuidad_equipo(self)
 
     def save(self, *args, **kwargs):
         from django.db import transaction
         with transaction.atomic():
             Proveedor.objects.select_for_update().get(pk=self.proveedor_id)
+            if not self.pk and self.activo and not self.proveedor.accesos.filter(activo=True, es_principal=True).exists():
+                self.es_principal = True
             self.clean()
             super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        raise ValidationError('Desactiva el acceso desde Equipo para conservar el historial.')
 
     class Meta:
         constraints = [models.UniqueConstraint(fields=['proveedor', 'usuario'], name='administrador_proveedor_unico')]
@@ -299,6 +313,10 @@ class OpinionBase(models.Model):
         ordering = ['-fecha', '-pk']
 
     @property
+    def tipo_reporte(self):
+        return 'opinion_producto' if self._meta.model_name == 'opinionproducto' else 'opinion_proveedor'
+
+    @property
     def compra_verificada(self):
         return self.orden.estado == Orden.Estado.COMPLETADA and self.usuario_id == self.orden.comprador_id
 
@@ -344,3 +362,94 @@ class Notificacion(models.Model):
     class Meta:
         ordering = ['-fecha', '-pk']
         indexes = [models.Index(fields=['usuario', 'leida'])]
+
+
+class SolicitudProveedor(models.Model):
+    class Estado(models.TextChoices):
+        PENDIENTE = 'PENDIENTE', 'Pendiente'
+        EN_REVISION = 'EN_REVISION', 'En revisión'
+        APROBADA = 'APROBADA', 'Aprobada'
+        RECHAZADA = 'RECHAZADA', 'Rechazada'
+
+    usuario = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='solicitudes_proveedor')
+    nombre_negocio = models.CharField(max_length=150)
+    razon_social = models.CharField(max_length=200, blank=True)
+    descripcion = models.TextField(max_length=3000)
+    correo = models.EmailField()
+    telefono = models.CharField(max_length=30)
+    whatsapp = models.CharField(max_length=30, blank=True)
+    ubicacion = models.CharField(max_length=250)
+    sitio_web = models.URLField(blank=True)
+    giros = models.ManyToManyField(GiroComercial)
+    estado = models.CharField(max_length=12, choices=Estado.choices, default=Estado.PENDIENTE)
+    fecha_creacion = models.DateTimeField(auto_now_add=True)
+    fecha_revision = models.DateTimeField(null=True, blank=True)
+    notas_admin = models.TextField(blank=True, max_length=3000)
+    proveedor = models.OneToOneField(Proveedor, null=True, blank=True, on_delete=models.PROTECT, related_name='solicitud_alta')
+
+    class Meta:
+        ordering = ['-fecha_creacion', '-pk']
+        constraints = [models.UniqueConstraint(fields=['usuario'], condition=Q(estado__in=['PENDIENTE', 'EN_REVISION']), name='una_solicitud_proveedor_activa')]
+
+    def __str__(self):
+        return self.nombre_negocio
+
+
+class ReporteContenido(models.Model):
+    class Estado(models.TextChoices):
+        PENDIENTE = 'PENDIENTE', 'Pendiente'
+        EN_REVISION = 'EN_REVISION', 'En revisión'
+        RESUELTO = 'RESUELTO', 'Resuelto'
+        DESCARTADO = 'DESCARTADO', 'Descartado'
+
+    class Tipo(models.TextChoices):
+        PRODUCTO = 'producto', 'Producto'
+        PROVEEDOR = 'proveedor', 'Proveedor'
+        OPINION_PRODUCTO = 'opinion_producto', 'Opinión de producto'
+        OPINION_PROVEEDOR = 'opinion_proveedor', 'Opinión de proveedor'
+
+    class Motivo(models.TextChoices):
+        FALSA = 'falsa', 'Información falsa'
+        INAPROPIADO = 'inapropiado', 'Contenido inapropiado'
+        FRAUDE = 'fraude', 'Fraude'
+        PROHIBIDO = 'prohibido', 'Producto prohibido'
+        SPAM = 'spam', 'Spam'
+        OTRO = 'otro', 'Otro'
+
+    usuario = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
+    tipo = models.CharField(max_length=20, choices=Tipo.choices)
+    producto = models.ForeignKey(Producto, on_delete=models.PROTECT, null=True, blank=True)
+    proveedor = models.ForeignKey(Proveedor, on_delete=models.PROTECT, null=True, blank=True)
+    opinion_producto = models.ForeignKey(OpinionProducto, on_delete=models.PROTECT, null=True, blank=True)
+    opinion_proveedor = models.ForeignKey(OpinionProveedor, on_delete=models.PROTECT, null=True, blank=True)
+    motivo = models.CharField(max_length=15, choices=Motivo.choices)
+    comentario = models.TextField(max_length=3000)
+    estado = models.CharField(max_length=12, choices=Estado.choices, default=Estado.PENDIENTE)
+    fecha = models.DateTimeField(auto_now_add=True)
+    fecha_revision = models.DateTimeField(null=True, blank=True)
+    notas_admin = models.TextField(blank=True, max_length=3000)
+
+    class Meta:
+        ordering = ['-fecha', '-pk']
+        constraints = [models.CheckConstraint(condition=(
+            Q(tipo='producto', producto__isnull=False, proveedor__isnull=True, opinion_producto__isnull=True, opinion_proveedor__isnull=True) |
+            Q(tipo='proveedor', producto__isnull=True, proveedor__isnull=False, opinion_producto__isnull=True, opinion_proveedor__isnull=True) |
+            Q(tipo='opinion_producto', producto__isnull=True, proveedor__isnull=True, opinion_producto__isnull=False, opinion_proveedor__isnull=True) |
+            Q(tipo='opinion_proveedor', producto__isnull=True, proveedor__isnull=True, opinion_producto__isnull=True, opinion_proveedor__isnull=False)
+        ), name='reporte_objeto_coherente')]
+
+    @property
+    def objeto(self):
+        return getattr(self, self.tipo)
+
+
+class RegistroAdministrativo(models.Model):
+    usuario = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
+    accion = models.CharField(max_length=80)
+    tipo_objeto = models.CharField(max_length=40)
+    objeto_id = models.PositiveBigIntegerField()
+    detalle = models.TextField(blank=True)
+    fecha = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-fecha', '-pk']

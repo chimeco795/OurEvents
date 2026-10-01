@@ -67,7 +67,7 @@ def editar_negocio(request, proveedor_id):
         form.save()
         messages.success(request, 'Datos actualizados.')
         return redirect('gestion_productos', proveedor_id=proveedor.pk)
-    return render(request, 'gestion/formulario.html', {'form': form, 'titulo': 'Datos del negocio'})
+    return render(request, 'gestion/formulario.html', {'form': form, 'titulo': 'Mi tienda'})
 
 
 @login_required

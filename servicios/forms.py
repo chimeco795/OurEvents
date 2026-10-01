@@ -33,7 +33,7 @@ class ProductoForm(forms.ModelForm):
 class ProveedorForm(forms.ModelForm):
     class Meta:
         model = Proveedor
-        fields = ['nombre', 'razon_social', 'descripcion', 'logotipo', 'portada', 'telefono', 'correo', 'whatsapp', 'sitio_web', 'ubicacion', 'giros']
+        fields = ['nombre', 'razon_social', 'descripcion', 'logotipo', 'portada', 'telefono', 'correo', 'whatsapp', 'sitio_web', 'ubicacion', 'giros', 'horario', 'zona_cobertura', 'pedido_minimo', 'tiempo_preparacion', 'formas_entrega', 'metodos_pago_informativos']
 
 class ComentarioForm(forms.ModelForm):
     class Meta:

@@ -1,5 +1,7 @@
 from django.contrib import admin
 from django import forms
+from django.shortcuts import redirect
+from django.utils.html import format_html
 from servicios.models import (Categoria, Producto, ProductoImagen, Comentario, Proveedor, AdministradorProveedor, GiroComercial, Profile, Orden, OrdenDetalle, OpinionProducto, OpinionProveedor, Notificacion, PlanMembresia, MembresiaProveedor)
 from servicios.application.memberships import validar_producto
 
@@ -27,13 +29,28 @@ class AccesoInline(admin.TabularInline):
     model = AdministradorProveedor
     formset = AccesosFormSet
     extra = 0
+    can_delete = False
+    readonly_fields = ['usuario', 'activo', 'es_principal']
+
+    def has_add_permission(self, request, obj=None):
+        return False
 
 @admin.register(Proveedor)
 class ProveedorAdmin(admin.ModelAdmin):
     list_display = ['nombre', 'estado', 'verificado', 'correo']
     list_filter = ['estado', 'verificado', 'giros']
     search_fields = ['nombre', 'razon_social', 'correo']
-    readonly_fields = ['fecha_alta']
+    readonly_fields = ['fecha_alta', 'estado', 'verificado', 'fecha_verificacion', 'gestion_ourevents']
+
+    def add_view(self, request, form_url='', extra_context=None):
+        return redirect('admin_proveedor_nuevo')
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    @admin.display(description='Administración y equipo')
+    def gestion_ourevents(self, obj):
+        return format_html('<a href="/administracion/proveedores/{}/">Gestionar en OurEvents</a>', obj.pk)
     inlines = [AccesoInline]
 
 class ProductoAdminForm(forms.ModelForm):
@@ -113,6 +130,13 @@ class MembresiaAdmin(admin.ModelAdmin):
     list_display = ['proveedor', 'plan', 'inicio', 'fin', 'activa']
     list_filter = ['plan', 'activa']
     search_fields = ['proveedor__nombre']
+    readonly_fields = [f.name for f in MembresiaProveedor._meta.fields]
+
+    def add_view(self, request, form_url='', extra_context=None):
+        return redirect('admin_proveedores')
+
+    def has_delete_permission(self, request, obj=None):
+        return False
 
 @admin.register(Notificacion)
 class NotificacionAdmin(admin.ModelAdmin):
@@ -130,3 +154,32 @@ class CategoriaAdmin(admin.ModelAdmin):
     search_fields = ['nombre']
 
 admin.site.register([Comentario, GiroComercial, Profile])
+
+
+from servicios.models import SolicitudProveedor, ReporteContenido, RegistroAdministrativo
+
+class HistorialAdmin(admin.ModelAdmin):
+    def get_readonly_fields(self, request, obj=None):
+        return [f.name for f in self.model._meta.fields] + [f.name for f in self.model._meta.many_to_many]
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+@admin.register(SolicitudProveedor)
+class SolicitudAdmin(HistorialAdmin):
+    list_display = ['nombre_negocio', 'usuario', 'estado', 'fecha_creacion']
+    list_filter = ['estado']
+    search_fields = ['nombre_negocio', 'usuario__username']
+
+@admin.register(ReporteContenido)
+class ReporteAdmin(HistorialAdmin):
+    list_display = ['tipo', 'motivo', 'usuario', 'estado', 'fecha']
+    list_filter = ['tipo', 'estado', 'motivo']
+
+@admin.register(RegistroAdministrativo)
+class RegistroAdmin(HistorialAdmin):
+    list_display = ['usuario', 'accion', 'tipo_objeto', 'objeto_id', 'fecha']
+    list_filter = ['accion', 'tipo_objeto']

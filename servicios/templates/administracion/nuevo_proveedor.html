@@ -1,0 +1,2 @@
+{% extends 'base.html' %}
+{% block content %}{% include 'components/admin_nav.html' %}<section class="panel form-panel"><h1>Nuevo proveedor</h1><p class="muted">Asigna una cuenta existente como administrador principal. Si aún no existe, puede registrarse desde la pantalla de acceso o crearse en <a href="/admin/auth/user/add/">Django Admin</a>.</p><form method="post">{% csrf_token %}{{ form.as_p }}<button>Crear proveedor</button></form></section>{% endblock %}

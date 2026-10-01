@@ -173,3 +173,34 @@ python -m pip check
 También se verificó el flujo comprador → dos productos → orden → proveedor → reserva → completada → opiniones desde el navegador local, y las consultas administrativas mediante pruebas HTTP. Revisión responsive en 320, 375, 768, 1024 y 1440 px. Ver [registro de validación](docs/fase-dos.md).
 
 Antes de despliegue ejecutar `check --deploy` con la configuración real. HSTS para subdominios y preload quedan desactivados hasta confirmar HTTPS en todo el dominio. Pendientes operativos: rotación de secretos, dominio/correo reales, almacenamiento de media, política de moderación, límites de frecuencia y estrategia de respaldo. No se ha desplegado a producción.
+
+## Fase 3: alta de proveedores y administración
+
+Se incorporan solicitudes para vender, panel propio exclusivo de superusuarios, gestión de tiendas y equipos, asignación manual de membresías y moderación con historial. No incorpora cobros ni pasarela de pagos.
+
+- `/quiero-vender/`: solicitud e historial personal; sólo una solicitud pendiente o en revisión por usuario. Un rechazo permite volver a solicitar.
+- `/administracion/`: indicadores, órdenes recientes y membresías próximas a vencer. Secciones `/solicitudes/`, `/proveedores/`, `/usuarios/`, `/membresias/` y `/moderacion/` bajo esa ruta.
+- `/administracion/proveedores/nuevo/`: alta manual con administrador existente, giro y plan.
+- `/gestion/<id>/datos/`: Mi tienda, imágenes, contacto y perfil comercial (horario, cobertura, pedido mínimo, preparación, entrega y métodos de pago informativos).
+- `/gestion/<id>/equipo/`: el principal administra accesos de usuarios existentes dentro del límite del plan. Los colaboradores no pueden gestionar el equipo. Se protege al último principal y se desactivan accesos conservando su historial.
+- `/reportar/<tipo>/<id>/` y `/mis-reportes/`: reportes de productos, proveedores y opiniones. El superusuario revisa, descarta o resuelve ocultando opiniones, desactivando productos o suspendiendo tiendas, sin borrar contenido.
+
+La aprobación crea atómicamente una tienda **activa**, un administrador principal y una membresía **GRATIS**. Se publica tras la revisión administrativa; la verificación es una decisión independiente y nunca se concede automáticamente. Las decisiones, accesos y reportes generan auditoría y las notificaciones correspondientes. Cambiar de plan preserva membresías anteriores y valida los límites antes de reducir capacidad.
+
+Modelos nuevos: `SolicitudProveedor`, `ReporteContenido` y `RegistroAdministrativo`. Se amplían `Proveedor` con información comercial y `AdministradorProveedor` con `es_principal` y protección de eliminación del usuario.
+
+Migraciones 0009–0011: añaden los campos/modelos y asignan como principal al primer administrador activo existente. Para tiendas sin administrador utilizable, la migración asigna custodia al primer superusuario activo; si no existe, crea una cuenta de custodia deshabilitada y sin contraseña utilizable. Un superusuario debe reasignar esas tiendas a un principal activo antes de publicarlas. No se cambia su estado ni se borra historial. Respaldo local previo: `backups/pre_phase_three.sqlite3` (excluido de Git).
+
+El seed ahora incluye **8 cuentas, 6 negocios y 30 productos**, dos solicitudes pendientes, una rechazada, una tienda suspendida, un colaborador disponible y reportes de ejemplo. Añade `solicitante1`, `solicitante2`, `solicitante3` y `colaborador`, con la misma contraseña inicial `OurEventsDemo2026!`. `admin` puede entrar a `/administracion/`. La ejecución repetida conserva decisiones y contraseñas existentes.
+
+Para actualizar la instalación local desde CMD:
+
+```cmd
+cd /d D:\Archivos\ChatGPT\OurEvents
+.venv\Scripts\activate
+python manage.py migrate
+python manage.py seed_demo
+python manage.py runserver
+```
+
+La suite completa contiene **58 pruebas**. Las 20 nuevas cubren solicitudes, transiciones, aprobación concurrente, rollback, permisos y POST falsificados, CSRF, límites y protección del equipo, moderación e historial. Incluye el flujo HTTP comprador → solicitud → aprobación → edición de Mi tienda → equipo → reporte → resolución administrativa. Los comandos de verificación anteriores siguen siendo aplicables; ejecutar también `python manage.py seed_demo` para preparar los ejemplos locales.

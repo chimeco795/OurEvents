@@ -1,0 +1,2 @@
+{% extends 'base.html' %}
+{% block content %}<section class="panel form-panel"><div class="eyebrow">Cuidemos la comunidad</div><h1>Reportar contenido</h1><p>{% if objeto.nombre %}{{ objeto.nombre }}{% else %}{{ objeto.comentario }}{% endif %}</p><p class="notice">El reporte inicia una revisión humana. No elimina ni oculta contenido automáticamente.</p><form method="post">{% csrf_token %}{{ form.as_p }}<button>Enviar reporte</button></form></section>{% endblock %}

@@ -1,0 +1,5 @@
+<form method="get" class="toolbar panel" aria-label="Filtros">
+  <div><label for="filtro-q">Buscar</label><input id="filtro-q" name="q" value="{{ request.GET.q }}" maxlength="150" placeholder="Nombre o usuario"></div>
+  {% if estados %}<div><label for="filtro-estado">Estado</label><select id="filtro-estado" name="estado"><option value="">Todos</option>{% for valor,etiqueta in estados %}<option value="{{ valor }}" {% if request.GET.estado == valor %}selected{% endif %}>{{ etiqueta }}</option>{% endfor %}</select></div>{% endif %}
+  <button>Filtrar</button>
+</form>

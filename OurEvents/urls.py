@@ -31,6 +31,6 @@ urlpatterns = [
 ]
 from django.conf import settings
 from django.conf.urls.static import static
-urlpatterns += [path('', include('servicios.marketplace_urls')), path('gestion/', include('servicios.urls'))]
+urlpatterns += [path('', include('servicios.provider_urls')), path('', include('servicios.marketplace_urls')), path('gestion/', include('servicios.urls'))]
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

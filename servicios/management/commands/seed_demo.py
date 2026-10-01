@@ -53,7 +53,7 @@ class Command(BaseCommand):
         if not settings.DEBUG:
             raise CommandError('seed_demo está deshabilitado con DEBUG=False.')
         User = get_user_model()
-        nombres_usuario = ['admin', 'proveedor1', 'proveedor2', 'comprador']
+        nombres_usuario = ['admin', 'proveedor1', 'proveedor2', 'comprador', 'solicitante1', 'solicitante2', 'solicitante3', 'colaborador']
         grupo, _ = Group.objects.get_or_create(name='ourevents-demo-local')
         for nombre in nombres_usuario:
             existente = User.objects.filter(username=nombre).first()
@@ -109,5 +109,7 @@ class Command(BaseCommand):
                 crear_opinion_proveedor(usuarios['comprador'],orden.pk,5,'Muy buena atención y comunicación. Una experiencia que repetiría.')
                 for producto in seleccion:
                     crear_opinion_producto(usuarios['comprador'],orden.pk,producto.pk,4+i%2,'Producto bien preparado y tal como lo esperaba. ¡Recomendado!')
-        self.stdout.write(self.style.SUCCESS('Demo listo: 4 cuentas, 5 negocios, 30 productos. Ejecuciones posteriores conservan datos y contraseñas existentes.'))
-        self.stdout.write('Usuarios: admin, proveedor1, proveedor2, comprador. Contraseña inicial: '+DEMO_PASSWORD)
+        from servicios.management.demo_providers import seed_provider_lifecycle
+        seed_provider_lifecycle(usuarios)
+        self.stdout.write(self.style.SUCCESS('Demo listo: 8 cuentas, 6 negocios, 30 productos y ciclo de alta/moderación. Ejecuciones posteriores conservan datos y contraseñas existentes.'))
+        self.stdout.write('Usuarios: admin, proveedor1, proveedor2, comprador, solicitante1, solicitante2, solicitante3, colaborador. Contraseña inicial: '+DEMO_PASSWORD)

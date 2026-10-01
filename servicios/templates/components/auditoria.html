@@ -1,0 +1,3 @@
+<section class="panel"><h2>Historial de decisiones</h2>
+{% for evento in historial %}<article class="review"><strong>{{ evento.accion }}</strong><p>{{ evento.detalle|default:'Sin notas adicionales' }}</p><small class="muted">{{ evento.usuario.username }} · {{ evento.fecha|date:'d M Y H:i' }}</small></article>{% empty %}<p class="muted">No hay decisiones registradas todavía.</p>{% endfor %}
+</section>

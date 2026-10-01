@@ -1,0 +1,8 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="page-heading"><div class="eyebrow">OurEvents</div><h1>Administración</h1><p class="muted">Supervisa altas, negocios y la confianza de la comunidad.</p></div>
+{% include 'components/admin_nav.html' %}
+<div class="kpis">{% for nombre,valor in kpis %}<div class="kpi"><strong>{{ valor }}</strong><span>{{ nombre }}</span></div>{% endfor %}</div>
+<div class="two-columns"><section class="panel"><h2>Órdenes recientes</h2>{% for orden in ordenes %}<p><a href="{% url 'orden_detalle' orden.pk %}">{{ orden.folio }}</a> · {{ orden.proveedor.nombre }} <span class="badge">{{ orden.get_estado_display }}</span></p>{% empty %}<p class="muted">Todavía no hay órdenes.</p>{% endfor %}</section><section class="panel"><h2>Membresías próximas a vencer</h2>{% for membresia in proximas %}<p><a href="{% url 'admin_proveedor' membresia.proveedor_id %}">{{ membresia.proveedor.nombre }}</a><br>{{ membresia.plan.nombre }} · {{ membresia.fin }}</p>{% empty %}<p class="muted">No hay vencimientos en los próximos 30 días.</p>{% endfor %}</section></div>
+<a href="/admin/">Abrir Django Admin →</a>
+{% endblock %}
