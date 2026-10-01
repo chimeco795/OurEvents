@@ -1,6 +1,5 @@
 """Presentación HTTP. Las mutaciones de negocio delegan en servicios de aplicación."""
 from django.contrib import messages
-from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError, PermissionDenied
 from django.core.paginator import Paginator
@@ -8,7 +7,7 @@ from django.db.models import Q, F, Count
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.http import require_POST
 from servicios.models import Orden, Producto, Proveedor, Categoria, OpinionProducto, OpinionProveedor, Notificacion
-from servicios.forms import BusquedaForm, CantidadForm, SolicitudForm, TransicionForm, OpinionForm, RespuestaForm, InventarioForm, PerfilForm, RegistroForm
+from servicios.forms import BusquedaForm, CantidadForm, SolicitudForm, TransicionForm, OpinionForm, RespuestaForm, InventarioForm
 from servicios.queries import productos_publicos, proveedores_publicos, buscar_productos, reputacion
 from servicios.permissions import obtener_proveedor, proveedores_administrables
 from servicios.domain.orders import acciones
@@ -115,26 +114,9 @@ def generar_orden(request, proveedor_id):
 @login_required
 def cuenta(request):
     pendientes = request.user.ordenes.filter(estado='COMPLETADA').annotate(total_detalles=Count('detalles', distinct=True), valorados=Count('opinionproducto', filter=Q(opinionproducto__usuario=request.user), distinct=True)).filter(Q(opinionproveedor__isnull=True) | Q(valorados__lt=F('total_detalles'))).select_related('proveedor')[:8]
-    return render(request, 'marketplace/cuenta.html', {'pendientes': pendientes})
-
-
-@login_required
-def perfil(request):
-    form = PerfilForm(request.POST or None, instance=request.user)
-    if request.method == 'POST' and form.is_valid():
-        form.save()
-        messages.success(request, 'Perfil actualizado.')
-        return redirect('cuenta')
-    return render(request, 'gestion/formulario.html', {'form': form, 'titulo': 'Mi perfil'})
-
-
-def registro(request):
-    form = RegistroForm(request.POST or None)
-    if request.method == 'POST' and form.is_valid():
-        usuario = form.save()
-        login(request, usuario)
-        return redirect('cuenta')
-    return render(request, 'gestion/formulario.html', {'form': form, 'titulo': 'Crear cuenta'})
+    from servicios.application.email_verification import perfil
+    from servicios.account_queries import tiendas_usuario
+    return render(request, 'marketplace/cuenta.html', {'pendientes': pendientes, 'perfil': perfil(request.user), 'recientes': request.user.ordenes.select_related('proveedor')[:5], 'tiendas': tiendas_usuario(request.user), 'avisos': request.user.notificaciones.all()[:5]})
 
 
 @login_required
@@ -225,7 +207,8 @@ def dashboard(request, proveedor_id):
     obj = obtener_proveedor(request.user, proveedor_id)
     productos = obj.productos.aggregate(activos=Count('pk', filter=Q(activo=True)), agotados=Count('pk', filter=Q(stock=0)), bajos=Count('pk', filter=Q(stock__gt=0, stock__lte=F('stock_minimo'))))
     ordenes_kpi = obj.ordenes.aggregate(nuevas=Count('pk', filter=Q(estado='NUEVA')), proceso=Count('pk', filter=Q(estado__in=['VISTA', 'ACEPTADA', 'EN_PROCESO', 'ATENDIDA'])), completadas=Count('pk', filter=Q(estado='COMPLETADA')))
-    return render(request, 'marketplace/dashboard.html', {'proveedor': obj, 'kpis': {**productos, **ordenes_kpi}, 'reputacion': reputacion(obj.opiniones), 'opiniones': obj.opiniones.select_related('usuario', 'orden')[:5]})
+    from servicios.account_queries import resumen_tienda
+    return render(request, 'marketplace/dashboard.html', {'proveedor': obj, 'configuracion': resumen_tienda(obj), 'kpis': {**productos, **ordenes_kpi}, 'reputacion': reputacion(obj.opiniones), 'opiniones': obj.opiniones.select_related('usuario', 'orden')[:5]})
 
 
 @login_required

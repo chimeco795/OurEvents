@@ -67,6 +67,14 @@ class Command(BaseCommand):
                 usuario.is_staff = usuario.is_superuser = nombre == 'admin'
                 usuario.save()
                 usuario.groups.add(grupo)
+            from servicios.models import Profile
+            p, _ = Profile.objects.get_or_create(user=usuario)
+            if not usuario.email:
+                usuario.email = nombre + '@demo.ourevents.test'
+                usuario.save(update_fields=['email'])
+                p.email_verificado = usuario.email
+                p.fecha_verificacion_email = timezone.now()
+                p.save()
             usuarios[nombre] = usuario
         planes = []
         for nombre, precio, productos, admins, promo in [('GRATIS',0,5,1,False),('PROFESIONAL',299,100,5,True),('EMPRESA',799,None,None,True)]:

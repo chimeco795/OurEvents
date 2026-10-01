@@ -1,0 +1,1 @@
+{% extends 'base.html' %}{% block content %}<section class="panel form-panel"><h1>Verificar mi correo</h1><p>Confirma que deseas verificar la dirección que recibió este enlace.</p><form method="post">{% csrf_token %}<button>Confirmar correo</button></form><p><a href="{% url 'cuenta' %}">Ir a Mi cuenta</a></p></section>{% endblock %}

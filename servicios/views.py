@@ -49,7 +49,7 @@ def perfil_usuario(request):
 
 @login_required
 def negocios(request):
-    return render(request, 'gestion/negocios.html', {'proveedores': proveedores_administrables(request.user)})
+    return redirect('mis_tiendas')
 
 
 @login_required
@@ -67,7 +67,7 @@ def editar_negocio(request, proveedor_id):
         form.save()
         messages.success(request, 'Datos actualizados.')
         return redirect('gestion_productos', proveedor_id=proveedor.pk)
-    return render(request, 'gestion/formulario.html', {'form': form, 'titulo': 'Mi tienda'})
+    return render(request, 'gestion/formulario.html', {'form': form, 'titulo': 'Mi tienda', 'proveedor': proveedor})
 
 
 @login_required
@@ -86,7 +86,7 @@ def editar_producto(request, proveedor_id, producto_id=None):
                 guardar_producto(request.user, form, imagenes)
             except ValidationError as exc:
                 form.add_error(None, exc)
-                return render(request, 'gestion/formulario.html', {'form': form, 'imagenes': imagenes, 'titulo': 'Producto'})
+                return render(request, 'gestion/formulario.html', {'form': form, 'imagenes': imagenes, 'titulo': 'Producto', 'proveedor': proveedor})
             messages.success(request, 'Producto guardado.')
             return redirect('gestion_productos', proveedor_id=proveedor.pk)
-    return render(request, 'gestion/formulario.html', {'form': form, 'imagenes': imagenes, 'titulo': 'Producto'})
+    return render(request, 'gestion/formulario.html', {'form': form, 'imagenes': imagenes, 'titulo': 'Producto', 'proveedor': proveedor})

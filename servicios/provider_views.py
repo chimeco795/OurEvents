@@ -41,7 +41,7 @@ def quiero_vender(request):
             return redirect('quiero_vender')
         except ValidationError as exc:
             form.add_error(None, exc)
-    return render(request, 'providers/quiero_vender.html', {'form': form, 'abierta': abierta, 'page_obj': paginar(request, historial)})
+    return render(request, 'providers/quiero_vender.html', {'form': form, 'abierta': abierta, 'correo_verificado': request.user.profile.correo_verificado, 'page_obj': paginar(request, historial)})
 
 
 @solo_superusuario
@@ -131,22 +131,6 @@ def asignar_plan(request, pk):
     else:
         messages.error(request, 'Selecciona un plan activo.')
     return redirect('admin_proveedor', pk=pk)
-
-
-@solo_superusuario
-def usuarios(request):
-    qs = get_user_model().objects.order_by('username')
-    if request.GET.get('q'):
-        qs = qs.filter(username__icontains=request.GET['q'][:150])
-    return render(request, 'administracion/usuarios.html', {'page_obj': paginar(request, qs), 'querystring': params_pagina(request)})
-
-
-@solo_superusuario
-def membresias(request):
-    qs = MembresiaProveedor.objects.select_related('proveedor', 'plan').order_by('-inicio', '-pk')
-    if request.GET.get('q'):
-        qs = qs.filter(proveedor__nombre__icontains=request.GET['q'][:150])
-    return render(request, 'administracion/membresias.html', {'page_obj': paginar(request, qs), 'querystring': params_pagina(request)})
 
 
 @login_required

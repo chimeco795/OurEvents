@@ -6,7 +6,7 @@ from servicios.models import MembresiaProveedor
 
 def membresia_vigente(proveedor):
     hoy = timezone.localdate()
-    return MembresiaProveedor.objects.select_related('plan').filter(proveedor=proveedor, activa=True, plan__activo=True, inicio__lte=hoy, fin__gte=hoy).first()
+    return MembresiaProveedor.objects.select_related('plan').filter(proveedor=proveedor, activa=True, inicio__lte=hoy, fin__gte=hoy).first()
 
 
 def plan_actual(proveedor):

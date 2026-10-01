@@ -15,6 +15,13 @@ from servicios.test_marketplace import DatosMixin
 class AltaMixin(DatosMixin):
     def preparar(self):
         self.datos()
+        from servicios.application.email_verification import perfil
+        self.buyer.email = 'buyer@example.test'
+        self.buyer.save(update_fields=['email'])
+        p = perfil(self.buyer)
+        p.email_verificado = self.buyer.email
+        p.fecha_verificacion_email = timezone.now()
+        p.save()
         self.admin = get_user_model().objects.create_superuser('admin_test', password='local-admin-test')
         self.giro = GiroComercial.objects.create(nombre='Alimentos artesanales')
         self.gratis = PlanMembresia.objects.create(nombre='GRATIS', max_productos=5, max_usuarios=1, precio=0)

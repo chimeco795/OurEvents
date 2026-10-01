@@ -6,20 +6,21 @@ from django.contrib.auth import views as auth_views
 
 
 urlpatterns = [
+    path('', include('servicios.account_urls')),
     path('admin/', admin.site.urls),
     path('', marketplace_views.home, name='home'),
 
     # Autenticación
     path('login/', auth_views.LoginView.as_view(template_name='login.html'), name='login'),
    
-    path('logout/', auth_views.LogoutView.as_view(template_name='logged_out.html'), name='logout'),
+
 
     
     # Si usas perfil personalizado
     path('accounts/profile/', views.perfil_usuario, name='perfil'),
 
-    path('accounts/password_change/', auth_views.PasswordChangeView.as_view(template_name='registration/password_change_form.html'), name='password_change'),
-    path('accounts/password_change/done/', auth_views.PasswordChangeDoneView.as_view(template_name='registration/password_change_done.html'), name='password_change_done'),
+    path('accounts/password_change/', auth_views.PasswordChangeView.as_view(template_name='accounts/password_change.html'), name='legacy_password_change'),
+    path('accounts/password_change/done/', auth_views.PasswordChangeDoneView.as_view(template_name='accounts/password_changed.html'), name='legacy_password_change_done'),
  
    
     # Otras rutas

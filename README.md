@@ -204,3 +204,45 @@ python manage.py runserver
 ```
 
 La suite completa contiene **58 pruebas**. Las 20 nuevas cubren solicitudes, transiciones, aprobación concurrente, rollback, permisos y POST falsificados, CSRF, límites y protección del equipo, moderación e historial. Incluye el flujo HTTP comprador → solicitud → aprobación → edición de Mi tienda → equipo → reporte → resolución administrativa. Los comandos de verificación anteriores siguen siendo aplicables; ejecutar también `python manage.py seed_demo` para preparar los ejemplos locales.
+
+## Fase 4: cuenta, seguridad y administración propia
+
+Los flujos habituales usan navegación y formularios de OurEvents. El menú de usuario reúne cuenta, órdenes, notificaciones, tiendas, alta de tienda, seguridad y cierre de sesión por POST. Sólo el superusuario ve Administración; Django Admin queda como **Administración técnica**, una herramienta de respaldo.
+
+Mi cuenta muestra datos de `User`, teléfono/foto del perfil, verificación del correo, órdenes recientes, opiniones pendientes, avisos y tiendas. El registro solicita nombre, apellido, usuario, correo y contraseña, inicia sesión y envía verificación. Cambiar la dirección invalida su verificación y los enlaces anteriores; no cambia el acceso a la cuenta.
+
+| Pantalla | Ruta |
+|---|---|
+| Cuenta / perfil | `/mi-cuenta/`, `/mi-cuenta/perfil/` |
+| Seguridad / contraseña | `/mi-cuenta/seguridad/`, `/mi-cuenta/seguridad/contrasena/` |
+| Recuperación | `/recuperar-contrasena/` |
+| Confirmar contraseña | `/restablecer/<uid>/<token>/` |
+| Verificar correo | `/verificar-correo/<token>/` |
+| Reenviar verificación (POST) | `/mi-cuenta/verificacion/enviar/` |
+| Preferencias de avisos | `/mi-cuenta/preferencias/` |
+| Mis tiendas | `/mis-tiendas/` |
+| Usuarios: listado / nuevo / detalle | `/administracion/usuarios/`, `/administracion/usuarios/nuevo/`, `/administracion/usuarios/<id>/` |
+| Planes: listado / nuevo / edición | `/administracion/planes/`, `/administracion/planes/nuevo/`, `/administracion/planes/<id>/` |
+| Membresías y filtros | `/administracion/membresias/` |
+
+### Correo y recuperación local
+
+El cambio de contraseña usa los validadores y formularios seguros de Django, conserva la sesión del dispositivo actual y utiliza un template propio. La recuperación devuelve la misma confirmación para correos existentes y desconocidos. Los enlaces de contraseña utilizan los tokens de Django; los de verificación caducan a las 24 horas y sólo pueden confirmarse una vez. La confirmación de correo requiere POST con CSRF. Hay un intervalo persistente de dos minutos por cuenta para cada clase de envío; cambiar el correo no evita ese límite.
+
+Con `EMAIL_BACKEND=django.core.mail.backends.console.EmailBackend`, ejecutar el servidor, solicitar recuperación/verificación y copiar el enlace impreso en su consola al navegador. Para entrega real configurar SMTP con las variables documentadas anteriormente. Los fallos de entrega se registran y no revierten el alta. No se implementa una cola de correo ni reintentos automáticos.
+
+El correo verificado es obligatorio **sólo para nuevas solicitudes de proveedor**. No se bloquea login ni se añade esta condición a opiniones de órdenes completadas. El seed completa direcciones demo vacías con `@demo.ourevents.test` y las verifica; conserva las direcciones, verificaciones y contraseñas que el usuario ya haya cambiado.
+
+### Usuarios, planes y tiendas
+
+Sólo superusuarios pueden crear/editar usuarios, activar/desactivar cuentas y administrar planes globales. El alta administrativa crea una contraseña inutilizable y envía un enlace para establecerla; no muestra contraseñas temporales ni permite conceder privilegios. Se protege al último superadministrador y al último responsable activo de una tienda. Los detalles muestran tiendas, órdenes y el `RegistroAdministrativo` existente.
+
+Los planes se crean, editan y desactivan sin borrar historial. Reducir límites muestra las tiendas excedidas y exige confirmación; no elimina productos ni accesos. Las características editadas se aplican al plan vigente, pero cada membresía conserva en `condiciones` la copia registrada al asignarla. Desactivar un plan evita nuevas asignaciones y conserva el acceso de las membresías vigentes hasta su vencimiento. El plan GRATIS conserva nombre, precio cero y estado activo para no interrumpir el onboarding.
+
+Mis tiendas muestra sólo accesos propios activos, incluyendo el estado de las tiendas suspendidas; la administración global sigue en el panel administrativo. El selector de contexto conserva el aislamiento backend. El checklist se calcula al consultar y no bloquea operaciones. La publicación depende del estado activo del proveedor: faltar logo, información o productos genera recomendaciones, sin inventar nuevos estados ni ocultar una ficha que las reglas actuales sí publican. Inventario configurado se aproxima como al menos un producto con existencias.
+
+Las preferencias de email cubren nuevas órdenes, cambios, opiniones y administración de tienda. Los avisos internos esenciales siguen activos y los correos se envían individualmente para no exponer direcciones de otros destinatarios. Recuperación y verificación son mensajes de seguridad solicitados y no dependen de estas preferencias.
+
+Migraciones **0012–0014**: amplían `Profile` y añaden `MembresiaProveedor.condiciones`, sin nuevos modelos. La migración 0013 copia las condiciones conocidas al migrar las membresías existentes; no puede reconstruir cambios anteriores al registro de estas condiciones. Respaldo previo local: `backups/pre_phase_four.sqlite3`, excluido de Git.
+
+Verificación de fase 4: **80 pruebas** (22 nuevas), migraciones, `check`, ausencia de migraciones pendientes, `pip check` y seed idempotente. Ver [validación de fase 4](docs/fase-cuatro.md). Las ocho cuentas demo anteriores conservan su contraseña inicial `OurEventsDemo2026!`. La validación de navegador deja además el usuario local `validacion_fase4` sin contraseña utilizable y el plan `VALIDACION FASE 4`, asignado a Taller Tierra; la membresía anterior permanece histórica. Estos datos están sólo en la base local, no en Git.

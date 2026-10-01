@@ -47,7 +47,10 @@ def giros_validos(giros):
 @transaction.atomic
 def solicitar_proveedor(usuario, datos):
     exigir_usuario(usuario)
-    get_user_model().objects.select_for_update().get(pk=usuario.pk)
+    usuario = get_user_model().objects.select_for_update().get(pk=usuario.pk)
+    from servicios.application.email_verification import perfil
+    if not perfil(usuario).correo_verificado:
+        raise ValidationError('Verifica tu correo desde Mi cuenta antes de enviar una solicitud.')
     if SolicitudProveedor.objects.filter(usuario=usuario, estado__in=['PENDIENTE', 'EN_REVISION']).exists():
         raise ValidationError('Ya tienes una solicitud pendiente o en revisión.')
     giros = giros_validos(datos.get('giros', []))
@@ -78,10 +81,12 @@ def _asignar_membresia(usuario, proveedor, plan):
         raise ValidationError('Desactiva accesos excedentes antes de cambiar a este plan.')
     if plan.max_usuarios == 0:
         raise ValidationError('La tienda necesita al menos un administrador.')
+    anterior = MembresiaProveedor.objects.filter(proveedor=proveedor, activa=True).select_related('plan').first()
+    nombre_anterior = anterior.plan.nombre if anterior else 'Sin membresía'
     MembresiaProveedor.objects.filter(proveedor=proveedor, activa=True).update(activa=False)
     hoy = timezone.localdate()
     membresia = MembresiaProveedor.objects.create(proveedor=proveedor, plan=plan, inicio=hoy, fin=hoy+timedelta(days=plan.duracion_dias))
-    auditar(usuario, 'membresia_asignada', proveedor, f'Plan {plan.nombre}; membresía {membresia.pk}')
+    auditar(usuario, 'membresia_asignada', proveedor, f'Plan {nombre_anterior} → {plan.nombre}; membresía {membresia.pk}')
     return membresia
 
 

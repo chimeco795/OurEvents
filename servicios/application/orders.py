@@ -94,7 +94,7 @@ def cambiar_estado(usuario, orden_id, destino, notas=''):
         orden.notas_proveedor = notas[:3000]
         orden.save(update_fields=['notas_proveedor'])
     destinatarios = [orden.comprador_id] if gestor else administradores(orden.proveedor)
-    crear_notificacion(destinatarios, 'orden_' + destino.lower(), f'Orden {orden.get_estado_display().lower()}', f'{orden.folio} cambió a {orden.get_estado_display()}.', f'/ordenes/{orden.pk}/', correo=destino in {'ACEPTADA', 'COMPLETADA'})
+    crear_notificacion(destinatarios, 'orden_' + destino.lower(), f'Orden {orden.get_estado_display().lower()}', f'{orden.folio} cambió a {orden.get_estado_display()}.', f'/ordenes/{orden.pk}/')
     return orden
 
 

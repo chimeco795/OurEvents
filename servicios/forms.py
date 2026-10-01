@@ -63,8 +63,6 @@ class ImagenesFormSet(BaseInlineFormSet):
 
 ImagenFormSet = inlineformset_factory(Producto, ProductoImagen, fields=['imagen', 'orden', 'principal', 'texto_alternativo'], formset=ImagenesFormSet, extra=1, max_num=10, validate_max=True)
 
-from django.contrib.auth import get_user_model
-from django.contrib.auth.forms import UserCreationForm
 from .models import GiroComercial
 
 
@@ -114,14 +112,3 @@ class InventarioForm(forms.Form):
     stock_anterior = forms.IntegerField(min_value=0, widget=forms.HiddenInput)
     stock = forms.IntegerField(min_value=0, max_value=2147483647)
     stock_minimo = forms.IntegerField(min_value=0, max_value=2147483647)
-
-
-class PerfilForm(forms.ModelForm):
-    class Meta:
-        model = get_user_model()
-        fields = ['first_name', 'last_name', 'email']
-
-
-class RegistroForm(UserCreationForm):
-    class Meta(UserCreationForm.Meta):
-        fields = ['username', 'email']

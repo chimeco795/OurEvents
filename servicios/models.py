@@ -211,6 +211,21 @@ class Comentario(models.Model):
 class Profile(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     photo = models.ImageField(upload_to='profiles/', blank=True, null=True)
+    telefono = models.CharField(max_length=30, blank=True)
+    email_verificado = models.EmailField(blank=True)
+    fecha_verificacion_email = models.DateTimeField(null=True, blank=True)
+    version_email = models.PositiveIntegerField(default=0)
+    ultimo_envio_verificacion = models.DateTimeField(null=True, blank=True)
+    ultimo_reset = models.DateTimeField(null=True, blank=True)
+    email_nueva_orden = models.BooleanField(default=True)
+    email_cambio_orden = models.BooleanField(default=True)
+    email_nueva_opinion = models.BooleanField(default=True)
+    email_administracion = models.BooleanField(default=True)
+
+    @property
+    def correo_verificado(self):
+        return bool(self.user.email and self.fecha_verificacion_email and self.email_verificado == self.user.email)
+
 
     def __str__(self):
         return f'Perfil de {self.user.username}'
@@ -236,6 +251,13 @@ class MembresiaProveedor(models.Model):
     inicio = models.DateField(default=date.today)
     fin = models.DateField()
     activa = models.BooleanField(default=True)
+    condiciones = models.JSONField(default=dict, blank=True)
+
+    def save(self, *args, **kwargs):
+        if self._state.adding and not self.condiciones:
+            from servicios.application.plans import condiciones
+            self.condiciones = condiciones(self.plan)
+        super().save(*args, **kwargs)
 
     class Meta:
         constraints = [
